@@ -4,7 +4,7 @@
   "description": "Backlog tasks Gantt chart viewer with cross-project user view",
   "private": true,
   "type": "module",
-  "homepage": "https://yourusername.github.io/backlog-gantt-chart",
+  "homepage": "https://gl-rohno.github.io/backlog-gantt-chart",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
