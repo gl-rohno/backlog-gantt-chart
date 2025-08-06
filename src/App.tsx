@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar, Settings, RefreshCw } from 'lucide-react';
+import { Calendar, Settings, RefreshCw, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import GanttChart from './components/GanttChart';
 import FilterPanel from './components/FilterPanel';
 import { BacklogApiService } from './services/backlogApi';
@@ -22,6 +22,7 @@ function App() {
   const [projectStatuses, setProjectStatuses] = useState<Map<number, BacklogStatus[]>>(new Map());
   const [allBacklogUsers, setAllBacklogUsers] = useState<BacklogUser[]>([]);
   const [resolutions, setResolutions] = useState<{id: number, name: string}[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
 
   const fetchData = async () => {
     if (!apiConfig.spaceId || !apiConfig.apiKey) {
@@ -178,7 +179,19 @@ function App() {
   const { availableUsers, availableProjects } = useMemo(() => {
     const filteredTasks = filterCompletedTasks(tasks, startDate);
     const availableUsers = Array.from(new Set(filteredTasks.map(task => task.assignee))).sort();
-    const availableProjects = Array.from(new Set(filteredTasks.map(task => task.projectKey))).sort();
+    
+    // プロジェクトキーと名前の組み合わせを取得
+    const projectMap = new Map();
+    filteredTasks.forEach(task => {
+      if (!projectMap.has(task.projectKey)) {
+        projectMap.set(task.projectKey, {
+          key: task.projectKey,
+          name: task.projectName
+        });
+      }
+    });
+    
+    const availableProjects = Array.from(projectMap.values()).sort((a, b) => a.key.localeCompare(b.key));
 
     return { availableUsers, availableProjects };
   }, [tasks, startDate]);
@@ -188,36 +201,52 @@ function App() {
     if (validUsers.length !== selectedUsers.length) {
       setSelectedUsers(availableUsers);
     }
-    setSelectedProjects(prev => prev.filter(project => availableProjects.includes(project)));
+    setSelectedProjects(prev => prev.filter(project => availableProjects.some(p => p.key === project)));
   }, [availableUsers, availableProjects, selectedUsers]);
 
   return (
     <div className="app">
       <header className="app-header">
-        <div className="header-left">
-          <Calendar size={24} />
-          <h1>Backlog ガントチャート</h1>
+        <div className="header-top">
+          <div className="header-title">
+            <Calendar size={24} />
+            <h1>Backlog ガントチャート</h1>
+          </div>
         </div>
-        <div className="header-right">
-          {!showSettings && (
-            <>
+        <div className="header-bottom">
+          <div className="header-left">
+            {!showSettings && (
               <button 
-                className="header-btn"
-                onClick={handleRefresh}
-                disabled={loading}
+                className={`header-btn ${showFilters ? 'active' : ''}`}
+                onClick={() => setShowFilters(!showFilters)}
+                title={showFilters ? 'フィルタを閉じる' : 'フィルタを開く'}
               >
-                <RefreshCw size={18} className={loading ? 'spinning' : ''} />
-                更新
+                {showFilters ? <ChevronLeft size={18} /> : <Filter size={18} />}
+                フィルタ
               </button>
-              <button 
-                className="header-btn"
-                onClick={() => setShowSettings(true)}
-              >
-                <Settings size={18} />
-                設定
-              </button>
-            </>
-          )}
+            )}
+          </div>
+          <div className="header-right">
+            {!showSettings && (
+              <>
+                <button 
+                  className="header-btn"
+                  onClick={handleRefresh}
+                  disabled={loading}
+                >
+                  <RefreshCw size={18} className={loading ? 'spinning' : ''} />
+                  更新
+                </button>
+                <button 
+                  className="header-btn"
+                  onClick={() => setShowSettings(true)}
+                >
+                  <Settings size={18} />
+                  設定
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
@@ -269,7 +298,7 @@ function App() {
         ) : (
           <>
             <div className="app-content">
-              <aside className="app-sidebar">
+              <aside className={`app-sidebar ${showFilters ? 'visible' : 'hidden'}`}>
                 <FilterPanel
                   users={availableUsers}
                   projects={availableProjects}

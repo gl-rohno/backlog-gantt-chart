@@ -10,7 +10,7 @@ registerLocale('ja', ja);
 
 interface FilterPanelProps {
   users: string[];
-  projects: string[];
+  projects: {key: string; name: string}[];
   selectedUsers: string[];
   selectedProjects: string[];
   startDate: string;
@@ -61,20 +61,19 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     onUserChange(users);
   };
 
-  const handleProjectToggle = (project: string) => {
-    if (selectedProjects.includes(project)) {
-      onProjectChange(selectedProjects.filter(p => p !== project));
+  const handleProjectToggle = (projectKey: string) => {
+    if (selectedProjects.includes(projectKey)) {
+      onProjectChange(selectedProjects.filter(p => p !== projectKey));
     } else {
-      onProjectChange([...selectedProjects, project]);
+      onProjectChange([...selectedProjects, projectKey]);
     }
   };
-
 
   const handleSelectAllProjects = () => {
     if (selectedProjects.length === projects.length) {
       onProjectChange([]);
     } else {
-      onProjectChange(projects);
+      onProjectChange(projects.map(p => p.key));
     }
   };
 
@@ -166,14 +165,17 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
         </div>
         <div className="filter-options">
           {projects.map(project => (
-            <label key={project} className="filter-option">
+            <label key={project.key} className="filter-option">
               <input
                 type="checkbox"
-                checked={selectedProjects.includes(project)}
-                onChange={() => handleProjectToggle(project)}
+                checked={selectedProjects.includes(project.key)}
+                onChange={() => handleProjectToggle(project.key)}
               />
               <span className="checkmark"></span>
-              <span className="option-text">{project}</span>
+              <span className="option-text">
+                <span className="project-key">[{project.key}]</span>
+                <span className="project-name">{project.name}</span>
+              </span>
             </label>
           ))}
         </div>

@@ -22,23 +22,38 @@ body {
 .app-header {
   background: white;
   border-bottom: 1px solid #e2e8f0;
-  padding: 1rem 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header-top {
+  padding: 1rem 2rem 0.5rem 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.header-bottom {
+  padding: 0.5rem 2rem 1rem 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .header-left {
   display: flex;
   align-items: center;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
   gap: 0.75rem;
 }
 
-.header-left h1 {
+.header-title h1 {
   font-size: 1.5rem;
   font-weight: 600;
   color: #2d3748;
+  margin: 0;
 }
 
 .header-right {
@@ -67,6 +82,18 @@ body {
   cursor: not-allowed;
 }
 
+.header-btn.active {
+  background: #3182ce;
+  border-color: #3182ce;
+  color: white;
+}
+
+.header-btn.active:hover {
+  background: #2c5aa0;
+  border-color: #2c5aa0;
+}
+
+
 .spinning {
   animation: spin 1s linear infinite;
 }
@@ -90,6 +117,7 @@ body {
   display: flex;
   height: 100%;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .app-sidebar {
@@ -97,6 +125,25 @@ body {
   background: white;
   border-right: 1px solid #e2e8f0;
   overflow-y: auto;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.app-sidebar.hidden {
+  width: 0;
+  min-width: 0;
+  transform: translateX(-100%);
+  opacity: 0;
+  border-right: none;
+  overflow: hidden;
+}
+
+.app-sidebar.visible {
+  width: 300px;
+  transform: translateX(0);
+  opacity: 1;
 }
 
 .app-body {
@@ -469,6 +516,21 @@ body {
 .option-text {
   flex: 1;
   color: #4a5568;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.project-key {
+  font-size: 0.75rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+.project-name {
+  font-size: 0.875rem;
+  color: #2d3748;
+  font-weight: 500;
 }
 
 /* Gantt Chart */
