@@ -15,12 +15,10 @@ interface GanttChartProps {
 }
 
 const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedProjects, startDate, onTaskUpdate, projectStatuses, resolutions }) => {
-  const [tooltip, setTooltip] = useState<{
+  const [modal, setModal] = useState<{
     show: boolean;
-    x: number;
-    y: number;
     task: GanttTask | null;
-  }>({ show: false, x: 0, y: 0, task: null });
+  }>({ show: false, task: null });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [scrollStart, setScrollStart] = useState({ x: 0, y: 0 });
@@ -30,50 +28,48 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
 
   const handleRowClick = (event: React.MouseEvent, task: GanttTask) => {
     event.stopPropagation();
-    setTooltip({
+    setModal({
       show: true,
-      x: event.clientX + 10,
-      y: event.clientY - 10,
       task: task
     });
   };
 
   const handleOutsideClick = () => {
-    setTooltip({ show: false, x: 0, y: 0, task: null });
+    setModal({ show: false, task: null });
     setEditMode(false);
     setEditForm({});
   };
 
-  const handleCloseTooltip = (e: React.MouseEvent) => {
+  const handleCloseModal = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setTooltip({ show: false, x: 0, y: 0, task: null });
+    setModal({ show: false, task: null });
     setEditMode(false);
     setEditForm({});
   };
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (tooltip.task) {
+    if (modal.task) {
       setEditMode(true);
       setEditForm({
-        assignee: tooltip.task.assignee,
-        startDate: tooltip.task.startDate,
-        endDate: tooltip.task.endDate,
-        priority: tooltip.task.priority,
-        status: tooltip.task.status,
-        resolution: tooltip.task.resolution || '',
-        comment: tooltip.task.comment || ''
+        assignee: modal.task.assignee,
+        startDate: modal.task.startDate,
+        endDate: modal.task.endDate,
+        priority: modal.task.priority,
+        status: modal.task.status,
+        resolution: modal.task.resolution || '',
+        comment: modal.task.comment || ''
       });
     }
   };
 
   const handleSaveEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (tooltip.task && onTaskUpdate) {
-      onTaskUpdate(tooltip.task.id, editForm);
+    if (modal.task && onTaskUpdate) {
+      onTaskUpdate(modal.task.id, editForm);
     }
     setEditMode(false);
-    setTooltip({ show: false, x: 0, y: 0, task: null });
+    setModal({ show: false, task: null });
     setEditForm({});
   };
 
@@ -91,8 +87,8 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
        e.target.closest('.task-name') ||
        e.target.classList.contains('gantt-bar') ||
        e.target.closest('.gantt-bar') ||
-       e.target.classList.contains('gantt-tooltip') ||
-       e.target.closest('.gantt-tooltip') ||
+       e.target.classList.contains('gantt-modal') ||
+       e.target.closest('.gantt-modal') ||
        e.target.tagName === 'INPUT' ||
        e.target.tagName === 'SELECT' ||
        e.target.tagName === 'TEXTAREA' ||
@@ -414,67 +410,56 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
         ))}
       </div>
       
-      {/* ツールチップ */}
-      {tooltip.show && tooltip.task && (
-        <div 
-          className="gantt-tooltip show"
-          style={{
-            left: `${tooltip.x}px`,
-            top: `${tooltip.y}px`
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="tooltip-header">
-            <div className="tooltip-title">
-              [{tooltip.task.issueKey}] {tooltip.task.name}
-            </div>
-            <div className="tooltip-actions">
-              {!editMode && (
+      {/* モーダル */}
+      {modal.show && modal.task && (
+        <>
+          <div className="gantt-modal-overlay" onClick={handleCloseModal} />
+          <div 
+            className="gantt-modal show"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div className="modal-title">
+                [{modal.task.issueKey}] {modal.task.name}
+              </div>
+              <div className="modal-actions">
                 <button 
-                  className="tooltip-edit-btn"
-                  onClick={handleEditClick}
-                  aria-label="編集"
+                  className="modal-close-btn"
+                  onClick={handleCloseModal}
+                  aria-label="閉じる"
                 >
-                  <Edit2 size={14} />
+                  <X size={16} />
                 </button>
-              )}
-              <button 
-                className="tooltip-close-btn"
-                onClick={handleCloseTooltip}
-                aria-label="閉じる"
-              >
-                <X size={14} />
-              </button>
+              </div>
             </div>
-          </div>
-          <div className="tooltip-content">
-            <div className="tooltip-row">
-              <div className="tooltip-label">プロジェクト:</div>
-              <div className="tooltip-value">{tooltip.task.projectKey}</div>
+            <div className="modal-content">
+            <div className="modal-row">
+              <div className="modal-label">プロジェクト:</div>
+              <div className="modal-value">{modal.task.projectKey}</div>
             </div>
-            <div className="tooltip-row">
-              <div className="tooltip-label">担当者:</div>
-              <div className="tooltip-value">
+            <div className="modal-row">
+              <div className="modal-label">担当者:</div>
+              <div className="modal-value">
                 {editMode ? (
                   <select
                     value={editForm.assignee || ''}
                     onChange={(e) => setEditForm(prev => ({ ...prev, assignee: e.target.value }))}
                     onClick={(e) => e.stopPropagation()}
                     onFocus={(e) => e.stopPropagation()}
-                    className="tooltip-select"
+                    className="modal-select"
                   >
                     {availableAssignees.map(assignee => (
                       <option key={assignee} value={assignee}>{assignee}</option>
                     ))}
                   </select>
                 ) : (
-                  tooltip.task.assignee
+                  modal.task.assignee
                 )}
               </div>
             </div>
-            <div className="tooltip-row">
-              <div className="tooltip-label">開始日:</div>
-              <div className="tooltip-value">
+            <div className="modal-row">
+              <div className="modal-label">開始日:</div>
+              <div className="modal-value">
                 {editMode ? (
                   <input
                     type="date"
@@ -485,16 +470,16 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
                     }))}
                     onClick={(e) => e.stopPropagation()}
                     onFocus={(e) => e.stopPropagation()}
-                    className="tooltip-input"
+                    className="modal-input"
                   />
                 ) : (
-                  formatDate(tooltip.task.startDate)
+                  formatDate(modal.task.startDate)
                 )}
               </div>
             </div>
-            <div className="tooltip-row">
-              <div className="tooltip-label">期限日:</div>
-              <div className="tooltip-value">
+            <div className="modal-row">
+              <div className="modal-label">期限日:</div>
+              <div className="modal-value">
                 {editMode ? (
                   <input
                     type="date"
@@ -505,63 +490,63 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
                     }))}
                     onClick={(e) => e.stopPropagation()}
                     onFocus={(e) => e.stopPropagation()}
-                    className="tooltip-input"
+                    className="modal-input"
                   />
                 ) : (
-                  formatDate(tooltip.task.endDate)
+                  formatDate(modal.task.endDate)
                 )}
               </div>
             </div>
-            <div className="tooltip-row">
-              <div className="tooltip-label">優先度:</div>
-              <div className="tooltip-value">
+            <div className="modal-row">
+              <div className="modal-label">優先度:</div>
+              <div className="modal-value">
                 {editMode ? (
                   <select
                     value={editForm.priority || ''}
                     onChange={(e) => setEditForm(prev => ({ ...prev, priority: e.target.value }))}
                     onClick={(e) => e.stopPropagation()}
                     onFocus={(e) => e.stopPropagation()}
-                    className="tooltip-select"
+                    className="modal-select"
                   >
                     {availablePriorities.map(priority => (
                       <option key={priority} value={priority}>{priority}</option>
                     ))}
                   </select>
                 ) : (
-                  tooltip.task.priority
+                  modal.task.priority
                 )}
               </div>
             </div>
-            <div className="tooltip-row">
-              <div className="tooltip-label">ステータス:</div>
-              <div className="tooltip-value">
+            <div className="modal-row">
+              <div className="modal-label">ステータス:</div>
+              <div className="modal-value">
                 {editMode ? (
                   <select
                     value={editForm.status || ''}
                     onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
                     onClick={(e) => e.stopPropagation()}
                     onFocus={(e) => e.stopPropagation()}
-                    className="tooltip-select"
+                    className="modal-select"
                   >
-                    {getAvailableStatuses(tooltip.task).map(status => (
+                    {getAvailableStatuses(modal.task).map(status => (
                       <option key={status} value={status}>{status}</option>
                     ))}
                   </select>
                 ) : (
-                  tooltip.task.status
+                  modal.task.status
                 )}
               </div>
             </div>
-            <div className="tooltip-row">
-              <div className="tooltip-label">完了理由:</div>
-              <div className="tooltip-value">
+            <div className="modal-row">
+              <div className="modal-label">完了理由:</div>
+              <div className="modal-value">
                 {editMode ? (
                   <select
                     value={editForm.resolution || ''}
                     onChange={(e) => setEditForm(prev => ({ ...prev, resolution: e.target.value }))}
                     onClick={(e) => e.stopPropagation()}
                     onFocus={(e) => e.stopPropagation()}
-                    className="tooltip-select"
+                    className="modal-select"
                   >
                     <option value="">未設定</option>
                     {resolutions.map(resolution => (
@@ -569,46 +554,59 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
                     ))}
                   </select>
                 ) : (
-                  tooltip.task.resolution || '未設定'
+                  modal.task.resolution || '未設定'
                 )}
               </div>
             </div>
             {editMode && (
-              <div className="tooltip-row">
-                <div className="tooltip-label">コメント:</div>
-                <div className="tooltip-value">
+              <div className="modal-row">
+                <div className="modal-label">コメント:</div>
+                <div className="modal-value">
                   <textarea
                     value={editForm.comment || ''}
                     onChange={(e) => setEditForm(prev => ({ ...prev, comment: e.target.value }))}
                     onClick={(e) => e.stopPropagation()}
                     onFocus={(e) => e.stopPropagation()}
-                    className="tooltip-textarea"
+                    className="modal-textarea"
                     placeholder="コメントを入力..."
                     rows={3}
                   />
                 </div>
               </div>
             )}
-            {editMode && (
-              <div className="tooltip-buttons">
+          </div>
+          <div className="modal-footer">
+            {editMode ? (
+              <div className="modal-buttons">
                 <button 
-                  className="tooltip-save-btn"
+                  className="modal-save-btn"
                   onClick={handleSaveEdit}
                 >
-                  <Save size={14} />
+                  <Save size={16} />
                   保存
                 </button>
                 <button 
-                  className="tooltip-cancel-btn"
+                  className="modal-cancel-btn"
                   onClick={handleCancelEdit}
                 >
-                  <XCircle size={14} />
+                  <XCircle size={16} />
                   キャンセル
+                </button>
+              </div>
+            ) : (
+              <div className="modal-buttons">
+                <button 
+                  className="modal-edit-main-btn"
+                  onClick={handleEditClick}
+                >
+                  <Edit2 size={16} />
+                  編集する
                 </button>
               </div>
             )}
           </div>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
