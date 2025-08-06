@@ -10,10 +10,8 @@ import {
 
 export class BacklogApiService {
   private api: AxiosInstance;
-  private spaceId: string;
 
   constructor(config: BacklogApiConfig) {
-    this.spaceId = config.spaceId;
     this.api = axios.create({
       baseURL: `https://${config.spaceId}.backlog.com/api/v2`,
       params: {

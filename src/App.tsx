@@ -3,13 +3,11 @@ import { Calendar, Settings, RefreshCw } from 'lucide-react';
 import GanttChart from './components/GanttChart';
 import FilterPanel from './components/FilterPanel';
 import { BacklogApiService } from './services/backlogApi';
-import { GanttTask, BacklogApiConfig, BacklogProject, BacklogStatus, BacklogUser } from './types/backlog';
+import { GanttTask, BacklogApiConfig, BacklogStatus, BacklogUser } from './types/backlog';
 import './App.css';
 
 function App() {
   const [tasks, setTasks] = useState<GanttTask[]>([]);
-  const [allUsers, setAllUsers] = useState<string[]>([]);
-  const [allProjects, setAllProjects] = useState<string[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -21,7 +19,6 @@ function App() {
     apiKey: ''
   });
   const [backlogService, setBacklogService] = useState<BacklogApiService | null>(null);
-  const [projects, setProjects] = useState<BacklogProject[]>([]);
   const [projectStatuses, setProjectStatuses] = useState<Map<number, BacklogStatus[]>>(new Map());
   const [allBacklogUsers, setAllBacklogUsers] = useState<BacklogUser[]>([]);
   const [resolutions, setResolutions] = useState<{id: number, name: string}[]>([]);
@@ -40,7 +37,6 @@ function App() {
       setBacklogService(backlogService);
       
       const backlogProjects = await backlogService.getProjects();
-      setProjects(backlogProjects);
       
       const [backlogUsers, backlogResolutions] = await Promise.all([
         backlogService.getAllUsers(),
@@ -69,8 +65,6 @@ function App() {
       const uniqueProjects = Array.from(new Set(ganttTasks.map(task => task.projectKey))).sort();
 
       setTasks(ganttTasks);
-      setAllUsers(uniqueUsers);
-      setAllProjects(uniqueProjects);
       setSelectedUsers(uniqueUsers);
       setSelectedProjects(uniqueProjects);
       setShowSettings(false);

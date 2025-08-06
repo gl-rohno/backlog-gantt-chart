@@ -348,7 +348,7 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
       </div>
       
       <div className="gantt-body" style={{ minWidth: `${chartWidth}px` }}>
-        {filteredTasks.map((task, taskIndex) => (
+        {filteredTasks.map((task) => (
           <div 
             key={task.id} 
             className="gantt-row" 
