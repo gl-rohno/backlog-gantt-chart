@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar, Settings, RefreshCw, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Settings, RefreshCw, Filter, ChevronLeft } from 'lucide-react';
 import GanttChart from './components/GanttChart';
 import FilterPanel from './components/FilterPanel';
 import { BacklogApiService } from './services/backlogApi';
