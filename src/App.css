@@ -549,7 +549,7 @@ body {
   border-bottom: 2px solid #e2e8f0;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100;
   flex-shrink: 0;
 }
 
@@ -560,7 +560,7 @@ body {
   position: sticky;
   left: 0;
   background: #f8f9fa;
-  z-index: 20;
+  z-index: 110;
 }
 
 .gantt-header-right {
@@ -569,18 +569,37 @@ body {
 
 
 .header-cell {
-  padding: 1rem 0.75rem;
+  padding: 0.75rem 0.5rem;
   font-weight: 600;
   color: #4a5568;
   border-right: 1px solid #e2e8f0;
   background: #f8f9fa;
+  font-size: 0.8rem;
 }
 
-.header-cell:nth-child(1) { width: 280px; }
-.header-cell:nth-child(2) { width: 120px; }
-.header-cell:nth-child(3) { width: 100px; }
-.header-cell:nth-child(4) { width: 80px; }
-.header-cell:nth-child(5) { width: 120px; }
+.header-cell.sortable {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.header-cell.sortable:hover {
+  background: #e2e8f0;
+}
+
+.header-cell.sortable span {
+  flex: 1;
+}
+
+.header-cell:nth-child(1) { width: 70px; }   /* プロジェクト */
+.header-cell:nth-child(2) { width: 200px; }  /* タスク名 */
+.header-cell:nth-child(3) { width: 90px; }   /* 担当者 */
+.header-cell:nth-child(4) { width: 80px; }   /* 開始日 */
+.header-cell:nth-child(5) { width: 80px; }   /* 期限日 */
+.header-cell:nth-child(6) { width: 90px; }   /* ステータス */
 
 .gantt-timeline {
   display: flex;
@@ -628,7 +647,7 @@ body {
   position: sticky;
   left: 0;
   background: inherit;
-  z-index: 15;
+  z-index: 50;
 }
 
 .gantt-row-right {
@@ -637,19 +656,20 @@ body {
 }
 
 .row-cell {
-  padding: 0.75rem;
+  padding: 0.5rem;
   display: flex;
   align-items: center;
   border-right: 1px solid #f1f5f9;
   color: #4a5568;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
 }
 
-.row-cell:nth-child(1) { width: 280px; }
-.row-cell:nth-child(2) { width: 120px; }
-.row-cell:nth-child(3) { width: 100px; }
-.row-cell:nth-child(4) { width: 80px; }
-.row-cell:nth-child(5) { width: 120px; }
+.row-cell:nth-child(1) { width: 70px; }   /* プロジェクト */
+.row-cell:nth-child(2) { width: 200px; }  /* タスク名 */
+.row-cell:nth-child(3) { width: 90px; }   /* 担当者 */
+.row-cell:nth-child(4) { width: 80px; }   /* 開始日 */
+.row-cell:nth-child(5) { width: 80px; }   /* 期限日 */
+.row-cell:nth-child(6) { width: 90px; }   /* ステータス */
 
 .task-name {
   flex-direction: column;
@@ -658,7 +678,7 @@ body {
 }
 
 .issue-key {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   color: #718096;
   font-weight: 500;
 }
@@ -673,20 +693,26 @@ body {
 }
 
 .project-badge {
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.4rem;
   background: #e2e8f0;
   border-radius: 0.25rem;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 500;
   color: #4a5568;
 }
 
 .priority-badge, .status-badge {
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.4rem;
   border-radius: 0.25rem;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   font-weight: 500;
   color: white;
+}
+
+.date-cell {
+  font-size: 0.7rem;
+  color: #4a5568;
+  white-space: nowrap;
 }
 
 .gantt-timeline-row {

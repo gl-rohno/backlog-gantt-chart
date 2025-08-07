@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useRef } from 'react';
 import { format, eachDayOfInterval, isSameDay, addMonths } from 'date-fns';
 import { ja } from 'date-fns/locale';
-import { X, Edit2, Save, XCircle } from 'lucide-react';
+import { X, Edit2, Save, XCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import { GanttTask, BacklogStatus } from '../types/backlog';
 
 interface GanttChartProps {
@@ -14,6 +14,9 @@ interface GanttChartProps {
   resolutions: {id: number, name: string}[];
 }
 
+type SortColumn = 'project' | 'task' | 'assignee' | 'startDate' | 'endDate' | 'status';
+type SortDirection = 'asc' | 'desc' | null;
+
 const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedProjects, startDate, onTaskUpdate, projectStatuses, resolutions }) => {
   const [modal, setModal] = useState<{
     show: boolean;
@@ -24,6 +27,8 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
   const [scrollStart, setScrollStart] = useState({ x: 0, y: 0 });
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState<Partial<GanttTask>>({});
+  const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleRowClick = (event: React.MouseEvent, task: GanttTask) => {
@@ -145,6 +150,24 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
     }
   };
 
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      // 同じ列をクリックした場合は方向を切り替え
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else if (sortDirection === 'desc') {
+        setSortColumn(null);
+        setSortDirection(null);
+      } else {
+        setSortDirection('asc');
+      }
+    } else {
+      // 別の列をクリックした場合は昇順でソート開始
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
   const formatDate = (date: Date | null) => {
     if (!date) return '未設定';
     return format(date, 'yyyy/MM/dd', { locale: ja });
@@ -211,16 +234,60 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
       return userMatch && projectMatch;
     });
 
-    // 開始日昇順でソート（開始日未設定の場合は最後に配置）
-    const sorted = [...filtered].sort((a, b) => {
-      if (!a.startDate && !b.startDate) return 0;
-      if (!a.startDate) return 1;
-      if (!b.startDate) return -1;
-      return a.startDate.getTime() - b.startDate.getTime();
-    });
+    // ソート処理
+    let sorted = [...filtered];
+    
+    if (sortColumn && sortDirection) {
+      sorted.sort((a, b) => {
+        let aVal: any;
+        let bVal: any;
+        
+        switch (sortColumn) {
+          case 'project':
+            aVal = a.projectKey;
+            bVal = b.projectKey;
+            break;
+          case 'task':
+            // タスク名はissueKeyでソート
+            aVal = a.issueKey;
+            bVal = b.issueKey;
+            break;
+          case 'assignee':
+            aVal = a.assignee;
+            bVal = b.assignee;
+            break;
+          case 'startDate':
+            aVal = a.startDate?.getTime() || 0;
+            bVal = b.startDate?.getTime() || 0;
+            break;
+          case 'endDate':
+            aVal = a.endDate?.getTime() || 0;
+            bVal = b.endDate?.getTime() || 0;
+            break;
+          case 'status':
+            aVal = a.status;
+            bVal = b.status;
+            break;
+          default:
+            return 0;
+        }
+        
+        if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    } else {
+      // デフォルトソート：開始日昇順（開始日未設定の場合は最後に配置）
+      sorted.sort((a, b) => {
+        if (!a.startDate && !b.startDate) return 0;
+        if (!a.startDate) return 1;
+        if (!b.startDate) return -1;
+        return a.startDate.getTime() - b.startDate.getTime();
+      });
+    }
 
     return sorted;
-  }, [tasks, selectedUsers, selectedProjects, startDate]);
+  }, [tasks, selectedUsers, selectedProjects, startDate, sortColumn, sortDirection]);
 
   const dateRange = useMemo(() => {
     // 表示開始日から3ヶ月間を表示
@@ -261,15 +328,6 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
     };
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case '最高': return '#e53e3e';
-      case '高': return '#fd7f28';
-      case '中': return '#3182ce';
-      case '低': return '#38a169';
-      default: return '#718096';
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -296,7 +354,7 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
     return getStatusColor(task.status);
   };
 
-  const chartWidth = 700 + (days.length * 40); // 左側700px(280+120+100+80+120) + 各日40px
+  const chartWidth = 610 + (days.length * 40); // 左側610px + 各日40px
 
   return (
     <div 
@@ -311,20 +369,41 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
     >
       <div className="gantt-header" style={{ minWidth: `${chartWidth}px` }}>
         <div className="gantt-header-left">
-          <div className="header-cell">
-            タスク
+          <div className="header-cell sortable" onClick={() => handleSort('project')}>
+            <span>プロジェクト</span>
+            {sortColumn === 'project' && (
+              sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+            )}
           </div>
-          <div className="header-cell">
-            担当者
+          <div className="header-cell sortable" onClick={() => handleSort('task')}>
+            <span>タスク名</span>
+            {sortColumn === 'task' && (
+              sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+            )}
           </div>
-          <div className="header-cell">
-            プロジェクト
+          <div className="header-cell sortable" onClick={() => handleSort('assignee')}>
+            <span>担当者</span>
+            {sortColumn === 'assignee' && (
+              sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+            )}
           </div>
-          <div className="header-cell">
-            優先度
+          <div className="header-cell sortable" onClick={() => handleSort('startDate')}>
+            <span>開始日</span>
+            {sortColumn === 'startDate' && (
+              sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+            )}
           </div>
-          <div className="header-cell">
-            ステータス
+          <div className="header-cell sortable" onClick={() => handleSort('endDate')}>
+            <span>期限日</span>
+            {sortColumn === 'endDate' && (
+              sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+            )}
+          </div>
+          <div className="header-cell sortable" onClick={() => handleSort('status')}>
+            <span>ステータス</span>
+            {sortColumn === 'status' && (
+              sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
+            )}
           </div>
         </div>
         <div className="gantt-header-right">
@@ -351,6 +430,9 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
             style={{ minWidth: `${chartWidth}px` }}
           >
             <div className="gantt-row-left">
+              <div className="row-cell">
+                <span className="project-badge">{task.projectKey}</span>
+              </div>
               <div 
                 className="row-cell task-name" 
                 style={{ cursor: 'pointer' }}
@@ -360,17 +442,8 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
                 <span className="task-summary">{task.name}</span>
               </div>
               <div className="row-cell">{task.assignee}</div>
-              <div className="row-cell">
-                <span className="project-badge">{task.projectKey}</span>
-              </div>
-              <div className="row-cell">
-                <span 
-                  className="priority-badge"
-                  style={{ backgroundColor: getPriorityColor(task.priority) }}
-                >
-                  {task.priority}
-                </span>
-              </div>
+              <div className="row-cell date-cell">{formatDate(task.startDate)}</div>
+              <div className="row-cell date-cell">{formatDate(task.endDate)}</div>
               <div className="row-cell">
                 <span 
                   className="status-badge"
