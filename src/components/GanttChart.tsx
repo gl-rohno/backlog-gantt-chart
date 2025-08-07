@@ -20,7 +20,6 @@ interface GanttChartProps {
 const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedProjects, startDate, onTaskUpdate, projectStatuses, resolutions }) => {
   const {
     modal,
-    dragState,
     editState,
     sortState,
     containerRef,

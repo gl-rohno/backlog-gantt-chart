@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo } from 'react';
 import { addMonths, eachDayOfInterval } from 'date-fns';
 import { GanttTask, BacklogStatus } from '../types/backlog';
-import { SortColumn, SortDirection, ModalState, DragState, EditState, SortState } from '../types/gantt';
+import { SortColumn, ModalState, DragState, EditState, SortState } from '../types/gantt';
 
 interface UseGanttChartProps {
   tasks: GanttTask[];
