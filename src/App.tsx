@@ -210,7 +210,7 @@ function App() {
         <div className="header-top">
           <div className="header-title">
             <Calendar size={24} />
-            <h1>Backlog ガントチャート</h1>
+            <h1>WorkspaceTimeline</h1>
           </div>
         </div>
         <div className="header-bottom">

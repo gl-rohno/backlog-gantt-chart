@@ -633,11 +633,15 @@ body {
   display: flex;
   border-bottom: 1px solid #e2e8f0;
   min-height: 50px;
-  background: white;
+  background: #f8f8f8;
 }
 
 .gantt-row:nth-child(even) {
-  background: #fafafa;
+  background: #f0f0f0;
+}
+
+.gantt-row:nth-child(even) .gantt-timeline-row {
+  background-color: #f0f0f0;
 }
 
 .gantt-row-left {
@@ -718,7 +722,7 @@ body {
 .gantt-timeline-row {
   height: 100%;
   position: relative;
-  background-color: #fafafa;
+  background-color: #f8f8f8;
 }
 
 .gantt-bar {
@@ -729,31 +733,19 @@ body {
   border-radius: 12px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 500;
+  color: #2d3748;
+  font-size: 0.7rem;
+  font-weight: 600;
   min-width: 40px;
-  overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 2;
   border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.gantt-bar-progress {
-  position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 12px;
-  transition: width 0.3s ease;
+  padding: 0 0.5rem;
 }
 
 .gantt-bar-text {
-  position: relative;
-  z-index: 1;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  overflow: visible;
 }
 
 /* Loading & Error States */
@@ -994,6 +986,25 @@ body {
   font-weight: 500;
   width: 100%;
   transition: all 0.2s;
+}
+
+.modal-input[type="date"] {
+  color-scheme: dark;
+}
+
+.modal-input[type="date"]::-webkit-calendar-picker-indicator {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%233182ce'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e");
+  background-color: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.8;
+  width: 20px;
+  height: 20px;
+}
+
+.modal-input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%232563eb'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e");
 }
 
 .modal-select:focus,
