@@ -737,6 +737,7 @@ body {
 
 /* Action Buttons */
 .copy-button,
+.link-button,
 .modal-button {
   background: transparent;
   border: 1px solid #e2e8f0;
@@ -752,21 +753,12 @@ body {
   height: 24px;
 }
 
-.copy-button:hover {
+.copy-button:hover,
+.link-button:hover,
+.modal-button:hover {
   background: #f7fafc;
   border-color: #cbd5e0;
   color: #4a5568;
-}
-
-.modal-button {
-  border-color: #bee3f8;
-  color: #3182ce;
-}
-
-.modal-button:hover {
-  background: #ebf8ff;
-  border-color: #90cdf4;
-  color: #2c5aa0;
 }
 
 .copy-notification {

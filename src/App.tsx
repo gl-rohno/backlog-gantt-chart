@@ -330,6 +330,7 @@ function App() {
                     selectedUsers={selectedUsers}
                     selectedProjects={selectedProjects}
                     startDate={new Date(startDate)}
+                    spaceId={apiConfig.spaceId}
                     onTaskUpdate={handleTaskUpdate}
                     projectStatuses={projectStatuses}
                     resolutions={resolutions}

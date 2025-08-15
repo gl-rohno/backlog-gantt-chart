@@ -13,6 +13,7 @@ interface GanttChartProps {
   selectedUsers: string[];
   selectedProjects: string[];
   startDate: Date;
+  spaceId: string;
   onTaskUpdate?: (taskId: string, updates: Partial<GanttTask>) => void;
   projectStatuses: Map<number, BacklogStatus[]>;
   resolutions: {id: number, name: string}[];
@@ -20,7 +21,7 @@ interface GanttChartProps {
 }
 
 
-const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedProjects, startDate, onTaskUpdate, projectStatuses, resolutions, onSortedTasksChange }) => {
+const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedProjects, startDate, spaceId, onTaskUpdate, projectStatuses, resolutions, onSortedTasksChange }) => {
   const [notification, setNotification] = useState<string | null>(null);
   
   const {
@@ -112,6 +113,7 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
                 <span className="task-summary">{task.name}</span>
                 <TaskActions
                   task={task}
+                  spaceId={spaceId}
                   onCopySuccess={handleCopySuccess}
                   onShowModal={handleRowClick}
                 />

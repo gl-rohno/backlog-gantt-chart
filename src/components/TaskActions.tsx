@@ -1,17 +1,20 @@
 import React from 'react';
 import CopyButton from './CopyButton';
 import ModalButton from './ModalButton';
+import LinkButton from './LinkButton';
 import { GanttTask } from '../types/backlog';
 import { CSS_CLASSES } from '../constants/app';
 
 interface TaskActionsProps {
   task: GanttTask;
+  spaceId: string;
   onCopySuccess: (message: string) => void;
   onShowModal: (e: React.MouseEvent, task: GanttTask) => void;
 }
 
 const TaskActions: React.FC<TaskActionsProps> = ({
   task,
+  spaceId,
   onCopySuccess,
   onShowModal
 }) => {
@@ -27,6 +30,11 @@ const TaskActions: React.FC<TaskActionsProps> = ({
         task={task}
         onShowModal={onShowModal}
         className="task-modal-btn"
+      />
+      <LinkButton 
+        task={task}
+        spaceId={spaceId}
+        className="task-link-btn"
       />
     </div>
   );
