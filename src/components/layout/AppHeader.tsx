@@ -7,7 +7,7 @@ interface AppHeaderProps {
   showSettings: boolean;
   showFilters: boolean;
   loading: boolean;
-  sortedTasks: GanttTask[];
+  getFilteredTasks: () => GanttTask[];
   onToggleFilters: () => void;
   onToggleSettings: () => void;
   onRefresh: () => void;
@@ -18,7 +18,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   showSettings,
   showFilters,
   loading,
-  sortedTasks,
+  getFilteredTasks,
   onToggleFilters,
   onToggleSettings,
   onRefresh,
@@ -45,7 +45,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 <span>フィルタ</span>
               </button>
               <BulkCopyButton
-                tasks={sortedTasks}
+                tasks={getFilteredTasks()}
                 onCopySuccess={onBulkCopySuccess}
               />
             </>

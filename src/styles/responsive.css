@@ -1,0 +1,318 @@
+/* レスポンシブデザイン専用スタイル */
+
+/* タブレット対応 (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .app-sidebar {
+    width: 250px;
+  }
+  
+  .gantt-header-left,
+  .gantt-row-left {
+    min-width: 500px;
+  }
+  
+  .gantt-body {
+    min-width: 1200px;
+  }
+}
+
+/* タブレット・スマホ共通 (768px以下) */
+@media (max-width: 768px) {
+  /* ヘッダー調整 */
+  .app-header {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+  
+  .header-top {
+    padding: var(--spacing-md) var(--spacing-sm) var(--spacing-sm) var(--spacing-sm);
+  }
+  
+  .header-bottom {
+    padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-md) var(--spacing-sm);
+    justify-content: space-between;
+    gap: var(--spacing-md);
+  }
+  
+  .header-title h1 {
+    font-size: var(--font-size-xl);
+  }
+  
+  /* ボタンテキストを非表示 */
+  .header-btn span {
+    display: none;
+  }
+  
+  /* サイドバー・フィルターパネル */
+  .app-content {
+    flex-direction: column;
+    position: relative;
+  }
+  
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: var(--sidebar-width-mobile);
+    height: 100vh;
+    max-height: none;
+    border-right: none;
+    border-bottom: none;
+    z-index: var(--z-modal-backdrop);
+    background-color: var(--bg-primary);
+    overflow-y: auto;
+    transform: translateX(-100%);
+    box-shadow: none;
+    transition: transform var(--transition-slow), box-shadow var(--transition-slow);
+  }
+  
+  .app-sidebar.visible {
+    transform: translateX(0);
+    box-shadow: var(--shadow-filter);
+  }
+  
+  .app-sidebar.hidden {
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+  
+  .filter-panel {
+    padding: var(--spacing-xl);
+    flex-direction: column;
+    gap: var(--spacing-xl);
+    height: 100vh;
+    position: relative;
+  }
+  
+  .filter-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    background-color: transparent;
+    border: 1px solid var(--border-normal);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-sm);
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all var(--transition-normal);
+    z-index: 10;
+  }
+  
+  .filter-close-btn:hover {
+    background-color: var(--color-gray-50);
+    border-color: var(--border-dark);
+    color: var(--text-secondary);
+  }
+  
+  .filter-section {
+    flex: none;
+  }
+  
+  .filter-options {
+    max-height: none;
+  }
+  
+  /* 設定パネル */
+  .settings-panel {
+    margin: var(--spacing-md);
+    padding: var(--spacing-lg);
+  }
+  
+  /* ガントチャート */
+  .gantt-chart {
+    overflow-x: auto;
+  }
+  
+  .gantt-header-left,
+  .gantt-row-left {
+    position: static;
+    z-index: auto;
+  }
+  
+  /* タスクアクション */
+  .task-actions {
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+  }
+  
+  .task-name.show-actions .task-actions {
+    opacity: 1;
+  }
+  
+  .task-name {
+    cursor: pointer;
+  }
+  
+  /* モーダル */
+  .gantt-modal {
+    max-width: 90vw;
+    min-width: 300px;
+    max-height: 80vh;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+  }
+  
+  .modal-content {
+    padding: var(--spacing-md);
+  }
+  
+  .modal-row {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+    text-align: left;
+  }
+  
+  .modal-label {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .modal-buttons {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .modal-save-btn,
+  .modal-cancel-btn,
+  .modal-edit-main-btn {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  /* タイムライン */
+  .timeline-cell {
+    min-width: 30px;
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* スマホ専用 (480px以下) */
+@media (max-width: 480px) {
+  .app-header {
+    padding: var(--spacing-sm);
+  }
+  
+  .header-left {
+    gap: var(--spacing-sm);
+  }
+  
+  .header-title h1 {
+    font-size: var(--font-size-lg);
+  }
+  
+  .header-btn {
+    padding: var(--spacing-sm);
+    font-size: var(--font-size-md);
+    min-width: 40px;
+    min-height: 40px;
+  }
+  
+  .filter-panel {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+  }
+  
+  .settings-panel {
+    margin: var(--spacing-sm);
+    padding: var(--spacing-md);
+  }
+  
+  .gantt-header-left,
+  .gantt-row-left {
+    min-width: 400px;
+  }
+  
+  .gantt-body {
+    min-width: 1000px;
+  }
+  
+  /* モーダルをさらに小さく */
+  .gantt-modal {
+    min-width: 280px;
+    max-width: 95vw;
+  }
+  
+  .modal-header {
+    padding: var(--spacing-md);
+  }
+  
+  .modal-content {
+    padding: var(--spacing-sm);
+  }
+  
+  .modal-footer {
+    padding: var(--spacing-md);
+  }
+}
+
+/* 大画面対応 (1200px以上) */
+@media (min-width: 1200px) {
+  .settings-panel {
+    max-width: 600px;
+  }
+  
+  .gantt-chart {
+    font-size: var(--font-size-md);
+  }
+}
+
+/* 横向きモバイル対応 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .filter-panel {
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+  
+  .filter-section {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .filter-options {
+    max-height: 150px;
+    overflow-y: auto;
+  }
+}
+
+/* 高DPI画面対応 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .gantt-bar {
+    border-width: 0.5px;
+  }
+  
+  .resize-handle {
+    width: 2px;
+  }
+}
+
+/* 印刷対応 */
+@media print {
+  .app-header,
+  .app-sidebar,
+  .task-actions,
+  .modal-overlay,
+  .loading-overlay,
+  .copy-notification {
+    display: none !important;
+  }
+  
+  .app-main {
+    height: auto !important;
+  }
+  
+  .gantt-chart {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  
+  .gantt-body {
+    min-width: auto !important;
+  }
+}

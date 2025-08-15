@@ -12,7 +12,7 @@ interface TaskActionsProps {
   onShowModal: (e: React.MouseEvent, task: GanttTask) => void;
 }
 
-const TaskActions: React.FC<TaskActionsProps> = ({
+const TaskActions: React.FC<TaskActionsProps> = React.memo(({
   task,
   spaceId,
   onCopySuccess,
@@ -42,6 +42,8 @@ const TaskActions: React.FC<TaskActionsProps> = ({
       />
     </div>
   );
-};
+});
+
+TaskActions.displayName = 'TaskActions';
 
 export default TaskActions;

@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { GanttTask, BacklogStatus } from '../types/backlog';
 import { useGanttChart } from '../hooks/useGanttChart';
+import { useRenderTime, useThrottle } from '../hooks/usePerformance';
 import { TaskModal } from './TaskModal';
 import { GanttHeader } from './GanttHeader';
 import { TaskBar } from './TaskBar';
@@ -17,11 +18,17 @@ interface GanttChartProps {
   onTaskUpdate?: (taskId: string, updates: Partial<GanttTask>) => void;
   projectStatuses: Map<number, BacklogStatus[]>;
   resolutions: {id: number, name: string}[];
-  onSortedTasksChange?: (sortedTasks: GanttTask[]) => void;
+}
+
+export interface GanttChartRef {
+  getFilteredTasks: () => GanttTask[];
 }
 
 
-const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedProjects, startDate, spaceId, onTaskUpdate, projectStatuses, resolutions, onSortedTasksChange }) => {
+const GanttChart = React.memo(forwardRef<GanttChartRef, GanttChartProps>(({ tasks, selectedUsers, selectedProjects, startDate, spaceId, onTaskUpdate, projectStatuses, resolutions }, ref) => {
+  // パフォーマンス監視は必要な時のみ有効化
+  // useRenderTime('GanttChart', { enabled: false, threshold: 200 });
+  
   const [notification, setNotification] = useState<string | null>(null);
   const [showActionsForTask, setShowActionsForTask] = useState<string | null>(null);
   const [columnWidths, setColumnWidths] = useState({
@@ -73,21 +80,26 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
     setTimeout(() => setNotification(null), TIMING.NOTIFICATION_DISPLAY_DURATION);
   }, []);
 
-  const handleColumnResize = useCallback((columnKey: string, width: number) => {
+  const handleColumnResize = useThrottle(useCallback((columnKey: string, width: number) => {
     setColumnWidths(prev => ({
       ...prev,
       [columnKey]: width
     }));
-  }, []);
+  }, []), 16); // 60fps制限
 
   const handleTaskNameClick = useCallback((taskId: string) => {
     setShowActionsForTask(prev => prev === taskId ? null : taskId);
   }, []);
 
-  // ソート済みタスクを親コンポーネントに通知
-  useEffect(() => {
-    onSortedTasksChange?.(filteredTasks);
-  }, [filteredTasks, onSortedTasksChange]);
+  // 外部から filteredTasks を取得できるようにする
+  useImperativeHandle(ref, () => ({
+    getFilteredTasks: () => filteredTasks
+  }), [filteredTasks]);
+
+  // 表示されるタスクのみをメモ化
+  const visibleTasks = useMemo(() => {
+    return filteredTasks.slice(0, 100); // 初期表示は100件まで
+  }, [filteredTasks]);
 
 
 
@@ -121,7 +133,7 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
       />
       
       <div className="gantt-body" style={{ minWidth: `${chartWidth}px` }}>
-        {filteredTasks.map((task) => (
+        {visibleTasks.map((task) => (
           <div 
             key={task.id} 
             className="gantt-row" 
@@ -195,6 +207,8 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
       )}
     </div>
   );
-};
+}));
+
+GanttChart.displayName = 'GanttChart';
 
 export default GanttChart;

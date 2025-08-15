@@ -1,13 +1,15 @@
-import React from 'react';
-import GanttChart from './components/GanttChart';
+import React, { useRef } from 'react';
+import GanttChart, { GanttChartRef } from './components/GanttChart';
 import FilterPanel from './components/FilterPanel';
 import { AppHeader } from './components/layout/AppHeader';
 import { SettingsPanel } from './components/layout/SettingsPanel';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { useApp } from './hooks/useApp';
 import { filterCompletedTasks } from './utils/ganttUtils';
 import './App.css';
 
 function App() {
+  const ganttChartRef = useRef<GanttChartRef>(null);
   const {
     // State
     tasks,
@@ -22,7 +24,6 @@ function App() {
     resolutions,
     showFilters,
     notification,
-    sortedTasks,
     availableUsers,
     availableProjects,
     
@@ -37,16 +38,16 @@ function App() {
     handleRefresh,
     handleTaskUpdate,
     handleBulkCopySuccess,
-    handleSortedTasksChange,
   } = useApp();
 
   return (
-    <div className="app">
+    <ErrorBoundary>
+      <div className="app">
       <AppHeader
         showSettings={showSettings}
         showFilters={showFilters}
         loading={loading}
-        sortedTasks={sortedTasks}
+        getFilteredTasks={() => ganttChartRef.current?.getFilteredTasks() || []}
         onToggleFilters={() => setShowFilters(!showFilters)}
         onToggleSettings={() => setShowSettings(true)}
         onRefresh={handleRefresh}
@@ -86,6 +87,7 @@ function App() {
                   </div>
                 ) : (
                   <GanttChart
+                    ref={ganttChartRef}
                     tasks={filterCompletedTasks(tasks, new Date(startDate))}
                     selectedUsers={selectedUsers}
                     selectedProjects={selectedProjects}
@@ -94,7 +96,6 @@ function App() {
                     onTaskUpdate={handleTaskUpdate}
                     projectStatuses={projectStatuses}
                     resolutions={resolutions}
-                    onSortedTasksChange={handleSortedTasksChange}
                   />
                 )}
               </div>
@@ -114,7 +115,8 @@ function App() {
           </>
         )}
       </main>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 }
 

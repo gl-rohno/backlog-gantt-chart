@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { BacklogApiService } from '../services/backlogApi';
 import { GanttTask, BacklogApiConfig, BacklogStatus, BacklogUser } from '../types/backlog';
 import { filterCompletedTasks } from '../utils/ganttUtils';
-import { handleApiError, logError } from '../utils/errorHandling';
+import { handleApiError, logError, getErrorMessage } from '../utils/errorHandling';
 
 export const useApp = () => {
   const [tasks, setTasks] = useState<GanttTask[]>([]);
@@ -22,7 +22,6 @@ export const useApp = () => {
   const [resolutions, setResolutions] = useState<{id: number, name: string}[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
-  const [sortedTasks, setSortedTasks] = useState<GanttTask[]>([]);
 
   const fetchData = async () => {
     if (!apiConfig.spaceId || !apiConfig.apiKey) {
@@ -72,7 +71,7 @@ export const useApp = () => {
     } catch (err) {
       const appError = handleApiError(err);
       logError(appError);
-      setError(appError.message);
+      setError(getErrorMessage(appError));
     } finally {
       setLoading(false);
     }
@@ -162,7 +161,7 @@ export const useApp = () => {
     } catch (error) {
       const appError = handleApiError(error);
       logError(appError);
-      setError(`タスクの更新に失敗しました: ${appError.message}`);
+      setError(`タスクの更新に失敗しました: ${getErrorMessage(appError)}`);
     } finally {
       setLoading(false);
     }
@@ -173,9 +172,6 @@ export const useApp = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const handleSortedTasksChange = (tasks: GanttTask[]) => {
-    setSortedTasks(tasks);
-  };
 
   const { availableUsers, availableProjects } = useMemo(() => {
     const filteredTasks = filterCompletedTasks(tasks, new Date(startDate));
@@ -196,13 +192,8 @@ export const useApp = () => {
     return { availableUsers, availableProjects };
   }, [tasks, startDate]);
 
-  useEffect(() => {
-    const validUsers = selectedUsers.filter(user => availableUsers.includes(user));
-    if (validUsers.length !== selectedUsers.length) {
-      setSelectedUsers(availableUsers);
-    }
-    setSelectedProjects(prev => prev.filter(project => availableProjects.some(p => p.key === project)));
-  }, [availableUsers, availableProjects, selectedUsers]);
+  // Remove the problematic useEffect that causes infinite loops
+  // User filtering will be handled in the UI components instead
 
   return {
     // State
@@ -220,7 +211,6 @@ export const useApp = () => {
     resolutions,
     showFilters,
     notification,
-    sortedTasks,
     availableUsers,
     availableProjects,
     
@@ -235,6 +225,5 @@ export const useApp = () => {
     handleRefresh,
     handleTaskUpdate,
     handleBulkCopySuccess,
-    handleSortedTasksChange,
   };
 };

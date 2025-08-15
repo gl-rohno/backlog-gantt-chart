@@ -10,7 +10,7 @@ interface TaskBarProps {
   onTaskClick: (e: React.MouseEvent, task: GanttTask) => void;
 }
 
-export const TaskBar: React.FC<TaskBarProps> = ({
+export const TaskBar: React.FC<TaskBarProps> = React.memo(({
   task,
   days,
   dateRange,
@@ -43,4 +43,6 @@ export const TaskBar: React.FC<TaskBarProps> = ({
       )}
     </div>
   );
-};
+});
+
+TaskBar.displayName = 'TaskBar';
