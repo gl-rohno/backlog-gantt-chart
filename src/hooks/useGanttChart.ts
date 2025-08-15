@@ -11,6 +11,14 @@ interface UseGanttChartProps {
   startDate: Date;
   onTaskUpdate?: (taskId: string, updates: Partial<GanttTask>) => void;
   projectStatuses: Map<number, BacklogStatus[]>;
+  columnWidths?: {
+    project: number;
+    task: number;
+    assignee: number;
+    startDate: number;
+    endDate: number;
+    status: number;
+  };
 }
 
 export const useGanttChart = ({
@@ -19,7 +27,15 @@ export const useGanttChart = ({
   selectedProjects,
   startDate,
   onTaskUpdate,
-  projectStatuses
+  projectStatuses,
+  columnWidths = {
+    project: 70,
+    task: 200,
+    assignee: 90,
+    startDate: 80,
+    endDate: 80,
+    status: 90
+  }
 }: UseGanttChartProps) => {
   // State management
   const [modal, setModal] = useState<ModalState>({ show: false, task: null });
@@ -292,7 +308,11 @@ export const useGanttChart = ({
     return eachDayOfInterval(dateRange);
   }, [dateRange]);
 
-  const chartWidth = 610 + (days.length * 40);
+  const chartWidth = useMemo(() => {
+    const leftColumnsWidth = Object.values(columnWidths).reduce((sum, width) => sum + width, 0);
+    const timelineWidth = days.length * 40;
+    return leftColumnsWidth + timelineWidth;
+  }, [columnWidths, days.length]);
 
   return {
     // State

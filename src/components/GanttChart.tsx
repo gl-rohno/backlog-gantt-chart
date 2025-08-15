@@ -5,7 +5,7 @@ import { TaskModal } from './TaskModal';
 import { GanttHeader } from './GanttHeader';
 import { TaskBar } from './TaskBar';
 import TaskActions from './TaskActions';
-import { formatDate, getStatusColor } from '../utils/ganttUtils';
+import { formatDate, getStatusColor, isTaskOverdue } from '../utils/ganttUtils';
 import { TIMING, MESSAGES, CSS_CLASSES } from '../constants/app';
 
 interface GanttChartProps {
@@ -23,6 +23,14 @@ interface GanttChartProps {
 
 const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedProjects, startDate, spaceId, onTaskUpdate, projectStatuses, resolutions, onSortedTasksChange }) => {
   const [notification, setNotification] = useState<string | null>(null);
+  const [columnWidths, setColumnWidths] = useState({
+    project: 70,
+    task: 200,
+    assignee: 90,
+    startDate: 80,
+    endDate: 80,
+    status: 90
+  });
   
   const {
     modal,
@@ -54,12 +62,20 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
     selectedProjects,
     startDate,
     onTaskUpdate,
-    projectStatuses
+    projectStatuses,
+    columnWidths
   });
 
   const handleCopySuccess = useCallback((message: string) => {
     setNotification(message);
     setTimeout(() => setNotification(null), TIMING.NOTIFICATION_DISPLAY_DURATION);
+  }, []);
+
+  const handleColumnResize = useCallback((columnKey: string, width: number) => {
+    setColumnWidths(prev => ({
+      ...prev,
+      [columnKey]: width
+    }));
   }, []);
 
   // ソート済みタスクを親コンポーネントに通知
@@ -95,6 +111,8 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
         sortColumn={sortState.sortColumn}
         sortDirection={sortState.sortDirection}
         onSort={handleSort}
+        columnWidths={columnWidths}
+        onColumnResize={handleColumnResize}
       />
       
       <div className="gantt-body" style={{ minWidth: `${chartWidth}px` }}>
@@ -105,12 +123,12 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
             style={{ minWidth: `${chartWidth}px` }}
           >
             <div className="gantt-row-left">
-              <div className="row-cell">
+              <div className="row-cell" style={{ width: `${columnWidths.project}px` }}>
                 <span className="project-badge">{task.projectKey}</span>
               </div>
-              <div className="row-cell task-name">
-                <span className="issue-key">[{task.issueKey}]</span>
-                <span className="task-summary">{task.name}</span>
+              <div className="row-cell task-name" style={{ width: `${columnWidths.task}px` }}>
+                <span className={`issue-key ${isTaskOverdue(task) ? 'overdue-text' : ''}`}>[{task.issueKey}]</span>
+                <span className={`task-summary ${isTaskOverdue(task) ? 'overdue-text' : ''}`}>{task.name}</span>
                 <TaskActions
                   task={task}
                   spaceId={spaceId}
@@ -118,10 +136,10 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
                   onShowModal={handleRowClick}
                 />
               </div>
-              <div className="row-cell">{task.assignee}</div>
-              <div className="row-cell date-cell">{formatDate(task.startDate)}</div>
-              <div className="row-cell date-cell">{formatDate(task.endDate)}</div>
-              <div className="row-cell">
+              <div className="row-cell" style={{ width: `${columnWidths.assignee}px` }}>{task.assignee}</div>
+              <div className="row-cell date-cell" style={{ width: `${columnWidths.startDate}px` }}>{formatDate(task.startDate)}</div>
+              <div className="row-cell date-cell" style={{ width: `${columnWidths.endDate}px` }}>{formatDate(task.endDate)}</div>
+              <div className="row-cell" style={{ width: `${columnWidths.status}px` }}>
                 <span 
                   className="status-badge"
                   style={{ backgroundColor: getStatusColor(task.status) }}

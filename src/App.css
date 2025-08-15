@@ -614,12 +614,30 @@ body {
   flex: 1;
 }
 
-.header-cell:nth-child(1) { width: 70px; }   /* プロジェクト */
-.header-cell:nth-child(2) { width: 200px; }  /* タスク名 */
-.header-cell:nth-child(3) { width: 90px; }   /* 担当者 */
-.header-cell:nth-child(4) { width: 80px; }   /* 開始日 */
-.header-cell:nth-child(5) { width: 80px; }   /* 期限日 */
-.header-cell:nth-child(6) { width: 90px; }   /* ステータス */
+.header-cell.resizable {
+  position: relative;
+}
+
+.resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 10;
+}
+
+.resize-handle:hover {
+  background: #3182ce;
+}
+
+.resize-handle:active {
+  background: #2c5aa0;
+}
+
+/* 列幅は動的に設定されるため、固定値は削除 */
 
 .gantt-timeline {
   display: flex;
@@ -662,6 +680,14 @@ body {
 
 .gantt-row:nth-child(even) .gantt-timeline-row {
   background-color: #f0f0f0;
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0px,
+    transparent 39px,
+    #e2e8f0 39px,
+    #e2e8f0 40px
+  );
+  background-size: 40px 100%;
 }
 
 .gantt-row-left {
@@ -688,12 +714,7 @@ body {
   font-size: 0.8rem;
 }
 
-.row-cell:nth-child(1) { width: 70px; }   /* プロジェクト */
-.row-cell:nth-child(2) { width: 200px; }  /* タスク名 */
-.row-cell:nth-child(3) { width: 90px; }   /* 担当者 */
-.row-cell:nth-child(4) { width: 80px; }   /* 開始日 */
-.row-cell:nth-child(5) { width: 80px; }   /* 期限日 */
-.row-cell:nth-child(6) { width: 90px; }   /* ステータス */
+/* 行セルの列幅も動的に設定されるため、固定値は削除 */
 
 .task-name {
   flex-direction: column;
@@ -714,6 +735,12 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 100%;
+}
+
+/* 期限切れタスクの文字色 */
+.overdue-text {
+  color: #dc2626 !important; /* 赤色 */
+  font-weight: 600 !important; /* 少し太字に */
 }
 
 /* Task Actions */
@@ -823,6 +850,14 @@ body {
   height: 100%;
   position: relative;
   background-color: #f8f8f8;
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0px,
+    transparent 39px,
+    #e2e8f0 39px,
+    #e2e8f0 40px
+  );
+  background-size: 40px 100%;
 }
 
 .gantt-bar {

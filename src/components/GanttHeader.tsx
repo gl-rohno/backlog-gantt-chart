@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { ChevronUp, ChevronDown } from 'lucide-react';
@@ -10,6 +10,15 @@ interface GanttHeaderProps {
   sortColumn: SortColumn | null;
   sortDirection: SortDirection | null;
   onSort: (column: SortColumn) => void;
+  columnWidths?: {
+    project: number;
+    task: number;
+    assignee: number;
+    startDate: number;
+    endDate: number;
+    status: number;
+  };
+  onColumnResize?: (columnKey: string, width: number) => void;
 }
 
 export const GanttHeader: React.FC<GanttHeaderProps> = ({
@@ -17,8 +26,21 @@ export const GanttHeader: React.FC<GanttHeaderProps> = ({
   days,
   sortColumn,
   sortDirection,
-  onSort
+  onSort,
+  columnWidths = {
+    project: 70,
+    task: 200,
+    assignee: 90,
+    startDate: 80,
+    endDate: 80,
+    status: 90
+  },
+  onColumnResize
 }) => {
+  const [isResizing, setIsResizing] = useState<string | null>(null);
+  const [startX, setStartX] = useState(0);
+  const [startWidth, setStartWidth] = useState(0);
+
   const renderSortIcon = (column: SortColumn) => {
     if (sortColumn === column) {
       return sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />;
@@ -26,33 +48,69 @@ export const GanttHeader: React.FC<GanttHeaderProps> = ({
     return null;
   };
 
+  const handleMouseDown = useCallback((e: React.MouseEvent, columnKey: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(columnKey);
+    setStartX(e.clientX);
+    setStartWidth(columnWidths[columnKey as keyof typeof columnWidths]);
+  }, [columnWidths]);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing || !onColumnResize) return;
+    
+    const diff = e.clientX - startX;
+    const newWidth = Math.max(50, startWidth + diff);
+    onColumnResize(isResizing, newWidth);
+  }, [isResizing, startX, startWidth, onColumnResize]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsResizing(null);
+  }, []);
+
+  React.useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isResizing, handleMouseMove, handleMouseUp]);
+
+  const renderHeaderCell = (
+    columnKey: string,
+    title: string,
+    sortKey: SortColumn,
+    width: number
+  ) => (
+    <div 
+      className="header-cell sortable resizable" 
+      style={{ width: `${width}px` }}
+      onClick={() => onSort(sortKey)}
+    >
+      <span>{title}</span>
+      {renderSortIcon(sortKey)}
+      {onColumnResize && (
+        <div 
+          className="resize-handle"
+          onMouseDown={(e) => handleMouseDown(e, columnKey)}
+        />
+      )}
+    </div>
+  );
+
   return (
     <div className="gantt-header" style={{ minWidth: `${chartWidth}px` }}>
       <div className="gantt-header-left">
-        <div className="header-cell sortable" onClick={() => onSort('projectKey')}>
-          <span>プロジェクト</span>
-          {renderSortIcon('projectKey')}
-        </div>
-        <div className="header-cell sortable" onClick={() => onSort('name')}>
-          <span>タスク名</span>
-          {renderSortIcon('name')}
-        </div>
-        <div className="header-cell sortable" onClick={() => onSort('assignee')}>
-          <span>担当者</span>
-          {renderSortIcon('assignee')}
-        </div>
-        <div className="header-cell sortable" onClick={() => onSort('startDate')}>
-          <span>開始日</span>
-          {renderSortIcon('startDate')}
-        </div>
-        <div className="header-cell sortable" onClick={() => onSort('endDate')}>
-          <span>期限日</span>
-          {renderSortIcon('endDate')}
-        </div>
-        <div className="header-cell sortable" onClick={() => onSort('status')}>
-          <span>ステータス</span>
-          {renderSortIcon('status')}
-        </div>
+        {renderHeaderCell('project', 'プロジェクト', 'projectKey', columnWidths.project)}
+        {renderHeaderCell('task', 'タスク名', 'name', columnWidths.task)}
+        {renderHeaderCell('assignee', '担当者', 'assignee', columnWidths.assignee)}
+        {renderHeaderCell('startDate', '開始日', 'startDate', columnWidths.startDate)}
+        {renderHeaderCell('endDate', '期限日', 'endDate', columnWidths.endDate)}
+        {renderHeaderCell('status', 'ステータス', 'status', columnWidths.status)}
       </div>
       <div className="gantt-header-right">
         <div className="gantt-timeline">
