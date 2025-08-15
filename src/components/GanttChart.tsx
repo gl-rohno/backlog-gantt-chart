@@ -23,6 +23,7 @@ interface GanttChartProps {
 
 const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedProjects, startDate, spaceId, onTaskUpdate, projectStatuses, resolutions, onSortedTasksChange }) => {
   const [notification, setNotification] = useState<string | null>(null);
+  const [showActionsForTask, setShowActionsForTask] = useState<string | null>(null);
   const [columnWidths, setColumnWidths] = useState({
     project: 70,
     task: 200,
@@ -34,6 +35,7 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
   
   const {
     modal,
+    dragState,
     editState,
     sortState,
     containerRef,
@@ -78,6 +80,10 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
     }));
   }, []);
 
+  const handleTaskNameClick = useCallback((taskId: string) => {
+    setShowActionsForTask(prev => prev === taskId ? null : taskId);
+  }, []);
+
   // ソート済みタスクを親コンポーネントに通知
   useEffect(() => {
     onSortedTasksChange?.(filteredTasks);
@@ -97,13 +103,12 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
   return (
     <div 
       ref={containerRef}
-      className="gantt-chart" 
+      className={`gantt-chart ${dragState.isDragging ? 'dragging' : ''}`}
       onClick={handleOutsideClick}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
-      style={{ cursor: modal.show || editState.editMode ? 'default' : 'grab' }}
     >
       <GanttHeader
         chartWidth={chartWidth}
@@ -126,7 +131,11 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
               <div className="row-cell" style={{ width: `${columnWidths.project}px` }}>
                 <span className="project-badge">{task.projectKey}</span>
               </div>
-              <div className="row-cell task-name" style={{ width: `${columnWidths.task}px` }}>
+              <div 
+                className={`row-cell task-name ${showActionsForTask === task.id ? 'show-actions' : ''}`} 
+                style={{ width: `${columnWidths.task}px` }}
+                onClick={() => handleTaskNameClick(task.id)}
+              >
                 <span className={`issue-key ${isTaskOverdue(task) ? 'overdue-text' : ''}`}>[{task.issueKey}]</span>
                 <span className={`task-summary ${isTaskOverdue(task) ? 'overdue-text' : ''}`}>{task.name}</span>
                 <TaskActions

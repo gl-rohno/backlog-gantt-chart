@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, FolderOpen, Calendar } from 'lucide-react';
+import { Users, FolderOpen, Calendar, X } from 'lucide-react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import { ja } from 'date-fns/locale';
 import { addMonths, subMonths, startOfMonth } from 'date-fns';
@@ -17,6 +17,7 @@ interface FilterPanelProps {
   onUserChange: (users: string[]) => void;
   onProjectChange: (projects: string[]) => void;
   onStartDateChange: (date: string) => void;
+  onClose?: () => void;
 }
 
 const FilterPanel: React.FC<FilterPanelProps> = ({
@@ -27,7 +28,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   startDate,
   onUserChange,
   onProjectChange,
-  onStartDateChange
+  onStartDateChange,
+  onClose
 }) => {
   const handleQuickDateSelect = (type: 'today' | 'prevMonth' | 'nextMonth') => {
     const currentDate = new Date(startDate);
@@ -79,6 +81,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 
   return (
     <div className="filter-panel">
+      <button className="filter-close-btn" onClick={onClose}>
+        <X size={24} />
+      </button>
       <div className="filter-section">
         <div className="filter-header">
           <Calendar size={20} />

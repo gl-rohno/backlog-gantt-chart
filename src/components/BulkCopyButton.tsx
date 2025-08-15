@@ -1,7 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { Copy, Check } from 'lucide-react';
 import { GanttTask } from '../types/backlog';
-import { MESSAGES, TIMING, UI, BUTTON_LABELS } from '../constants/app';
+import { MESSAGES, UI, BUTTON_LABELS } from '../constants/app';
+import { useClipboard } from '../hooks/useClipboard';
 
 interface BulkCopyButtonProps {
   tasks: GanttTask[];
@@ -14,28 +15,23 @@ const BulkCopyButton: React.FC<BulkCopyButtonProps> = ({
   onCopySuccess, 
   className = '' 
 }) => {
-  const [copied, setCopied] = useState(false);
+  const { copied, copyToClipboard } = useClipboard();
 
-  const handleBulkCopy = useCallback(async () => {
+  const handleBulkCopy = async () => {
     if (tasks.length === 0) {
       return;
     }
 
-    // 課題キーと課題名称を改行区切りで結合
     const textToCopy = tasks
       .map(task => `${task.issueKey} ${task.name}`)
       .join('\n');
     
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      setCopied(true);
+    const success = await copyToClipboard(textToCopy);
+    
+    if (success) {
       onCopySuccess?.(`${tasks.length}${MESSAGES.BULK_COPY_SUCCESS}`);
-      
-      setTimeout(() => setCopied(false), TIMING.COPY_FEEDBACK_DURATION);
-    } catch (err) {
-      console.error(MESSAGES.COPY_FAILED, err);
     }
-  }, [tasks, onCopySuccess]);
+  };
 
   const isDisabled = tasks.length === 0;
   const title = isDisabled 
@@ -52,7 +48,7 @@ const BulkCopyButton: React.FC<BulkCopyButtonProps> = ({
       disabled={isDisabled}
     >
       {copied ? <Check size={UI.ICON_SIZE} /> : <Copy size={UI.ICON_SIZE} />}
-      {BUTTON_LABELS.BULK_COPY}
+      <span>{BUTTON_LABELS.BULK_COPY}</span>
     </button>
   );
 };

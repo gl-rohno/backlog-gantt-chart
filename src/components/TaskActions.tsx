@@ -18,8 +18,12 @@ const TaskActions: React.FC<TaskActionsProps> = ({
   onCopySuccess,
   onShowModal
 }) => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className={CSS_CLASSES.TASK_ACTIONS}>
+    <div className={CSS_CLASSES.TASK_ACTIONS} onClick={handleClick}>
       <CopyButton 
         issueKey={task.issueKey}
         taskName={task.name}

@@ -39,6 +39,39 @@ export interface BacklogPriority {
   name: string;
 }
 
+export interface BacklogResolution {
+  id: number;
+  name: string;
+}
+
+export interface BacklogCategory {
+  id: number;
+  name: string;
+  displayOrder: number;
+}
+
+export interface BacklogVersion {
+  id: number;
+  projectId: number;
+  name: string;
+  description: string;
+  startDate: string | null;
+  releaseDueDate: string | null;
+  archived: boolean;
+  displayOrder: number;
+}
+
+export interface BacklogMilestone {
+  id: number;
+  projectId: number;
+  name: string;
+  description: string;
+  startDate: string | null;
+  releaseDueDate: string | null;
+  archived: boolean;
+  displayOrder: number;
+}
+
 export interface BacklogIssue {
   id: number;
   projectId: number;
@@ -47,16 +80,13 @@ export interface BacklogIssue {
   issueType: BacklogIssueType;
   summary: string;
   description: string;
-  resolution: null | {
-    id: number;
-    name: string;
-  };
+  resolution: BacklogResolution | null;
   priority: BacklogPriority;
   status: BacklogStatus;
   assignee: BacklogUser | null;
-  category: any[];
-  versions: any[];
-  milestone: any[];
+  category: BacklogCategory[];
+  versions: BacklogVersion[];
+  milestone: BacklogMilestone[];
   startDate: string | null;
   dueDate: string | null;
   estimatedHours: number | null;

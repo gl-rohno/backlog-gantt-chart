@@ -107,17 +107,20 @@ export const useGanttChart = ({
 
   // Drag handlers
   const handleMouseDown = (e: React.MouseEvent) => {
+    // ドラッグを許可するのは gantt-timeline-row のみ
+    if (
+      !(e.target instanceof HTMLElement &&
+        (e.target.classList.contains('gantt-timeline-row') ||
+         e.target.closest('.gantt-timeline-row')))
+    ) {
+      return;
+    }
+
+    // gantt-bar やその他のインタラクティブ要素は除外
     if (
       e.target instanceof HTMLElement &&
-      (e.target.classList.contains('task-name') ||
-       e.target.closest('.task-name') ||
-       e.target.classList.contains('gantt-bar') ||
+      (e.target.classList.contains('gantt-bar') ||
        e.target.closest('.gantt-bar') ||
-       e.target.classList.contains('gantt-modal') ||
-       e.target.closest('.gantt-modal') ||
-       e.target.tagName === 'INPUT' ||
-       e.target.tagName === 'SELECT' ||
-       e.target.tagName === 'TEXTAREA' ||
        e.target.tagName === 'BUTTON')
     ) {
       return;
@@ -130,10 +133,9 @@ export const useGanttChart = ({
         ...prev,
         scrollStart: {
           x: containerRef.current!.scrollLeft,
-          y: containerRef.current!.scrollTop
+          y: 0
         }
       }));
-      containerRef.current.style.cursor = 'grabbing';
     }
 
     e.preventDefault();
@@ -143,26 +145,18 @@ export const useGanttChart = ({
     if (!dragState.isDragging || !containerRef.current) return;
 
     const deltaX = dragState.dragStart.x - e.clientX;
-    const deltaY = dragState.dragStart.y - e.clientY;
 
     containerRef.current.scrollLeft = dragState.scrollStart.x + deltaX;
-    containerRef.current.scrollTop = dragState.scrollStart.y + deltaY;
 
     e.preventDefault();
   };
 
   const handleMouseUp = () => {
     setDragState(prev => ({ ...prev, isDragging: false }));
-    if (containerRef.current) {
-      containerRef.current.style.cursor = 'grab';
-    }
   };
 
   const handleMouseLeave = () => {
     setDragState(prev => ({ ...prev, isDragging: false }));
-    if (containerRef.current) {
-      containerRef.current.style.cursor = 'grab';
-    }
   };
 
   // Sort handler

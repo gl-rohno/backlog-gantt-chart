@@ -251,6 +251,28 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  position: relative;
+}
+
+.filter-close-btn {
+  display: none;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #718096;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.filter-close-btn:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+  color: #4a5568;
 }
 
 .filter-section {
@@ -561,6 +583,7 @@ body {
   flex-direction: column;
   width: 100%;
   user-select: none;
+  cursor: default;
 }
 
 .gantt-header {
@@ -858,6 +881,15 @@ body {
     #e2e8f0 40px
   );
   background-size: 40px 100%;
+  cursor: grab;
+}
+
+.gantt-chart.dragging .gantt-timeline-row {
+  cursor: grabbing !important;
+}
+
+.gantt-chart.dragging * {
+  cursor: grabbing !important;
 }
 
 .gantt-bar {
@@ -1271,7 +1303,21 @@ body {
 
 @media (max-width: 768px) {
   .app-header {
-    padding: 1rem;
+    padding: 1rem 0.5rem;
+  }
+  
+  .header-top {
+    padding: 1rem 0.5rem 0.5rem 0.5rem;
+  }
+  
+  .header-bottom {
+    padding: 0.5rem 0.5rem 1rem 0.5rem;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  
+  .header-btn span {
+    display: none;
   }
   
   .header-left h1 {
@@ -1280,27 +1326,59 @@ body {
   
   .app-content {
     flex-direction: column;
+    position: relative;
   }
   
   .app-sidebar {
-    width: 100%;
-    max-height: 300px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    max-height: none;
     border-right: none;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: none;
+    z-index: 1000;
+    background: white;
+    overflow-y: auto;
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+  
+  .app-sidebar.visible {
+    transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .app-sidebar.hidden {
+    transform: translateX(-100%);
+    width: 100vw;
+    opacity: 1;
+    box-shadow: none;
   }
   
   .filter-panel {
-    padding: 1rem;
-    flex-direction: row;
-    gap: 1rem;
+    padding: 2rem;
+    flex-direction: column;
+    gap: 2rem;
+    height: 100vh;
+    position: relative;
+  }
+  
+  .filter-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .filter-section {
-    flex: 1;
+    flex: none;
   }
   
   .filter-options {
-    max-height: 200px;
+    max-height: none;
   }
   
   .settings-panel {
@@ -1310,6 +1388,61 @@ body {
   
   .gantt-chart {
     overflow-x: auto;
+  }
+  
+  .gantt-header-left,
+  .gantt-row-left {
+    position: static;
+    z-index: auto;
+  }
+  
+  .task-actions {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+  }
+  
+  .task-name.show-actions .task-actions {
+    opacity: 1;
+  }
+  
+  .task-name {
+    cursor: pointer;
+  }
+  
+  .gantt-modal {
+    max-width: 90vw;
+    min-width: 300px;
+    max-height: 80vh;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .modal-content {
+    padding: 1rem;
+  }
+  
+  .modal-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    text-align: left;
+  }
+  
+  .modal-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .modal-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .modal-save-btn,
+  .modal-cancel-btn,
+  .modal-edit-main-btn {
+    width: 100%;
+    min-width: auto;
   }
   
   .timeline-cell {

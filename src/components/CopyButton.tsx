@@ -1,6 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { Copy, Check } from 'lucide-react';
-import { MESSAGES, TIMING, UI, CSS_CLASSES, BUTTON_LABELS } from '../constants/app';
+import { MESSAGES, UI, CSS_CLASSES, BUTTON_LABELS } from '../constants/app';
+import { useClipboard } from '../hooks/useClipboard';
 
 interface CopyButtonProps {
   issueKey: string;
@@ -15,23 +16,18 @@ const CopyButton: React.FC<CopyButtonProps> = ({
   onCopySuccess, 
   className = '' 
 }) => {
-  const [copied, setCopied] = useState(false);
+  const { copied, copyToClipboard } = useClipboard();
 
-  const handleCopy = useCallback(async (e: React.MouseEvent) => {
+  const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
     const textToCopy = `${issueKey} ${taskName}`;
+    const success = await copyToClipboard(textToCopy);
     
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      setCopied(true);
+    if (success) {
       onCopySuccess?.(MESSAGES.COPY_SUCCESS);
-      
-      setTimeout(() => setCopied(false), TIMING.COPY_FEEDBACK_DURATION);
-    } catch (err) {
-      console.error(MESSAGES.COPY_FAILED, err);
     }
-  }, [issueKey, taskName, onCopySuccess]);
+  };
 
   const title = `${issueKey} ${taskName}${BUTTON_LABELS.COPY_TASK}`;
 
