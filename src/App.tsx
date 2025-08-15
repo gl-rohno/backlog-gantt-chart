@@ -2,8 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Calendar, Settings, RefreshCw, Filter, ChevronLeft } from 'lucide-react';
 import GanttChart from './components/GanttChart';
 import FilterPanel from './components/FilterPanel';
+import BulkCopyButton from './components/BulkCopyButton';
 import { BacklogApiService } from './services/backlogApi';
 import { GanttTask, BacklogApiConfig, BacklogStatus, BacklogUser } from './types/backlog';
+import { filterCompletedTasks } from './utils/ganttUtils';
 import './App.css';
 
 function App() {
@@ -23,6 +25,8 @@ function App() {
   const [allBacklogUsers, setAllBacklogUsers] = useState<BacklogUser[]>([]);
   const [resolutions, setResolutions] = useState<{id: number, name: string}[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [notification, setNotification] = useState<string | null>(null);
+  const [sortedTasks, setSortedTasks] = useState<GanttTask[]>([]);
 
   const fetchData = async () => {
     if (!apiConfig.spaceId || !apiConfig.apiKey) {
@@ -86,7 +90,7 @@ function App() {
   };
 
   const convertUpdatesToBacklogFormat = (taskId: string, updates: Partial<GanttTask>) => {
-    const backlogUpdates: any = {};
+    const backlogUpdates: Record<string, unknown> = {};
     
     if (updates.assignee) {
       const user = allBacklogUsers.find(u => u.name === updates.assignee);
@@ -164,20 +168,18 @@ function App() {
     }
   };
 
-  const filterCompletedTasks = (tasks: GanttTask[], startDate: string) => {
-    return tasks.filter(task => {
-      const isCompleted = task.status === '完了';
-      const isEndBeforeStart = task.endDate && task.endDate < new Date(startDate);
-      
-      if (isCompleted && isEndBeforeStart) return false;
-      if (isCompleted && !task.endDate) return false;
-      
-      return true;
-    });
+
+  const handleBulkCopySuccess = (message: string) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const handleSortedTasksChange = (tasks: GanttTask[]) => {
+    setSortedTasks(tasks);
   };
 
   const { availableUsers, availableProjects } = useMemo(() => {
-    const filteredTasks = filterCompletedTasks(tasks, startDate);
+    const filteredTasks = filterCompletedTasks(tasks, new Date(startDate));
     const availableUsers = Array.from(new Set(filteredTasks.map(task => task.assignee))).sort();
     
     // プロジェクトキーと名前の組み合わせを取得
@@ -216,14 +218,20 @@ function App() {
         <div className="header-bottom">
           <div className="header-left">
             {!showSettings && (
-              <button 
-                className={`header-btn ${showFilters ? 'active' : ''}`}
-                onClick={() => setShowFilters(!showFilters)}
-                title={showFilters ? 'フィルタを閉じる' : 'フィルタを開く'}
-              >
-                {showFilters ? <ChevronLeft size={18} /> : <Filter size={18} />}
-                フィルタ
-              </button>
+              <>
+                <button 
+                  className={`header-btn ${showFilters ? 'active' : ''}`}
+                  onClick={() => setShowFilters(!showFilters)}
+                  title={showFilters ? 'フィルタを閉じる' : 'フィルタを開く'}
+                >
+                  {showFilters ? <ChevronLeft size={18} /> : <Filter size={18} />}
+                  フィルタ
+                </button>
+                <BulkCopyButton
+                  tasks={sortedTasks}
+                  onCopySuccess={handleBulkCopySuccess}
+                />
+              </>
             )}
           </div>
           <div className="header-right">
@@ -318,13 +326,14 @@ function App() {
                   </div>
                 ) : (
                   <GanttChart
-                    tasks={tasks}
+                    tasks={filterCompletedTasks(tasks, new Date(startDate))}
                     selectedUsers={selectedUsers}
                     selectedProjects={selectedProjects}
                     startDate={new Date(startDate)}
                     onTaskUpdate={handleTaskUpdate}
                     projectStatuses={projectStatuses}
                     resolutions={resolutions}
+                    onSortedTasksChange={handleSortedTasksChange}
                   />
                 )}
               </div>
@@ -335,6 +344,11 @@ function App() {
                   <RefreshCw size={48} className="spinning" />
                   <p>データを読み込み中...</p>
                 </div>
+              </div>
+            )}
+            {notification && (
+              <div className="copy-notification">
+                {notification}
               </div>
             )}
           </>

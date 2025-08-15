@@ -21,69 +21,49 @@ export class BacklogApiService {
   }
 
   async getProjects(): Promise<BacklogProject[]> {
-    try {
-      const response = await this.api.get('/projects');
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await this.api.get('/projects');
+    return response.data;
   }
 
   async getIssues(): Promise<BacklogIssue[]> {
-    try {
-      const allIssues: BacklogIssue[] = [];
-      let offset = 0;
-      const limit = 100;
+    const allIssues: BacklogIssue[] = [];
+    let offset = 0;
+    const limit = 100;
 
-      // 最大1000件まで取得
-      while (offset < 1000) {
-        const params: any = {
-          count: limit,
-          offset: offset,
-          sort: 'created',
-          order: 'desc'
-        };
+    // 最大1000件まで取得
+    while (offset < 1000) {
+      const params = {
+        count: limit,
+        offset: offset,
+        sort: 'created' as const,
+        order: 'desc' as const
+      };
 
-        const response = await this.api.get('/issues', { params });
-        const issues: BacklogIssue[] = response.data;
-        
-        if (issues.length === 0) break; // データがなくなったら終了
-        
-        allIssues.push(...issues);
-        offset += limit;
-      }
+      const response = await this.api.get('/issues', { params });
+      const issues: BacklogIssue[] = response.data;
       
-      return allIssues;
-    } catch (error) {
-      throw error;
+      if (issues.length === 0) break; // データがなくなったら終了
+      
+      allIssues.push(...issues);
+      offset += limit;
     }
+    
+    return allIssues;
   }
 
   async getAllUsers(): Promise<BacklogUser[]> {
-    try {
-      const response = await this.api.get('/users');
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await this.api.get('/users');
+    return response.data;
   }
 
   async getProjectStatuses(projectId: number): Promise<BacklogStatus[]> {
-    try {
-      const response = await this.api.get(`/projects/${projectId}/statuses`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await this.api.get(`/projects/${projectId}/statuses`);
+    return response.data;
   }
 
   async getResolutions(): Promise<{id: number, name: string}[]> {
-    try {
-      const response = await this.api.get('/resolutions');
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await this.api.get('/resolutions');
+    return response.data;
   }
 
   async updateIssue(issueId: number, updates: {
@@ -95,36 +75,32 @@ export class BacklogApiService {
     dueDate?: string | null;
     comment?: string;
   }): Promise<BacklogIssue> {
-    try {
-      const params: any = {};
-      
-      if (updates.assigneeId !== undefined) {
-        params.assigneeId = updates.assigneeId;
-      }
-      if (updates.statusId !== undefined) {
-        params.statusId = updates.statusId;
-      }
-      if (updates.priorityId !== undefined) {
-        params.priorityId = updates.priorityId;
-      }
-      if (updates.resolutionId !== undefined) {
-        params.resolutionId = updates.resolutionId;
-      }
-      if (updates.startDate !== undefined) {
-        params.startDate = updates.startDate;
-      }
-      if (updates.dueDate !== undefined) {
-        params.dueDate = updates.dueDate;
-      }
-      if (updates.comment) {
-        params.comment = updates.comment;
-      }
-
-      const response = await this.api.patch(`/issues/${issueId}`, params);
-      return response.data;
-    } catch (error) {
-      throw error;
+    const params: Record<string, unknown> = {};
+    
+    if (updates.assigneeId !== undefined) {
+      params.assigneeId = updates.assigneeId;
     }
+    if (updates.statusId !== undefined) {
+      params.statusId = updates.statusId;
+    }
+    if (updates.priorityId !== undefined) {
+      params.priorityId = updates.priorityId;
+    }
+    if (updates.resolutionId !== undefined) {
+      params.resolutionId = updates.resolutionId;
+    }
+    if (updates.startDate !== undefined) {
+      params.startDate = updates.startDate;
+    }
+    if (updates.dueDate !== undefined) {
+      params.dueDate = updates.dueDate;
+    }
+    if (updates.comment) {
+      params.comment = updates.comment;
+    }
+
+    const response = await this.api.patch(`/issues/${issueId}`, params);
+    return response.data;
   }
 
   transformIssuestoGanttTasks(issues: BacklogIssue[], projects: BacklogProject[]): GanttTask[] {

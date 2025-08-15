@@ -1,7 +1,8 @@
-import { useState, useRef, useMemo } from 'react';
-import { addMonths, eachDayOfInterval } from 'date-fns';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import { GanttTask, BacklogStatus } from '../types/backlog';
 import { SortColumn, ModalState, DragState, EditState, SortState } from '../types/gantt';
+import { addMonths, eachDayOfInterval } from 'date-fns';
+import { filterCompletedTasks } from '../utils/ganttUtils';
 
 interface UseGanttChartProps {
   tasks: GanttTask[];
@@ -32,28 +33,28 @@ export const useGanttChart = ({
     editForm: {}
   });
   const [sortState, setSortState] = useState<SortState>({
-    sortColumn: null,
-    sortDirection: null
+    sortColumn: 'startDate',
+    sortDirection: 'asc'
   });
   
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Modal handlers
-  const handleRowClick = (event: React.MouseEvent, task: GanttTask) => {
+  const handleRowClick = useCallback((event: React.MouseEvent, task: GanttTask) => {
     event.stopPropagation();
     setModal({ show: true, task });
-  };
+  }, []);
 
-  const handleOutsideClick = () => {
+  const handleOutsideClick = useCallback(() => {
     setModal({ show: false, task: null });
     setEditState({ editMode: false, editForm: {} });
-  };
+  }, []);
 
-  const handleCloseModal = (e: React.MouseEvent) => {
+  const handleCloseModal = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setModal({ show: false, task: null });
     setEditState({ editMode: false, editForm: {} });
-  };
+  }, []);
 
   // Edit handlers
   const handleEditClick = (e: React.MouseEvent) => {
@@ -153,8 +154,6 @@ export const useGanttChart = ({
     if (sortState.sortColumn === column) {
       if (sortState.sortDirection === 'asc') {
         setSortState({ sortColumn: column, sortDirection: 'desc' });
-      } else if (sortState.sortDirection === 'desc') {
-        setSortState({ sortColumn: null, sortDirection: null });
       } else {
         setSortState({ sortColumn: column, sortDirection: 'asc' });
       }
@@ -196,24 +195,13 @@ export const useGanttChart = ({
   };
 
   const filteredTasks = useMemo(() => {
-    if (selectedUsers.length === 0 || selectedProjects.length === 0) {
-      return [];
-    }
+    // First apply completed task filtering
+    const completedFiltered = filterCompletedTasks(tasks, startDate);
     
-    const filtered = tasks.filter(task => {
-      const userMatch = selectedUsers.includes(task.assignee);
-      const projectMatch = selectedProjects.includes(task.projectKey);
-      
-      const isCompleted = task.status === '完了';
-      const isEndBeforeStart = task.endDate && task.endDate < startDate;
-      
-      if (isCompleted && isEndBeforeStart) {
-        return false;
-      }
-      
-      if (isCompleted && !task.endDate) {
-        return false;
-      }
+    // Then apply user and project filtering
+    const filtered = completedFiltered.filter(task => {
+      const userMatch = selectedUsers.length === 0 || selectedUsers.includes(task.assignee);
+      const projectMatch = selectedProjects.length === 0 || selectedProjects.includes(task.projectKey);
       
       return userMatch && projectMatch;
     });
@@ -222,48 +210,73 @@ export const useGanttChart = ({
     
     if (sortState.sortColumn && sortState.sortDirection) {
       sorted.sort((a, b) => {
-        let aVal: any;
-        let bVal: any;
-        
-        switch (sortState.sortColumn) {
-          case 'project':
-            aVal = a.projectKey;
-            bVal = b.projectKey;
-            break;
-          case 'task':
-            aVal = a.issueKey;
-            bVal = b.issueKey;
-            break;
-          case 'assignee':
-            aVal = a.assignee;
-            bVal = b.assignee;
-            break;
-          case 'startDate':
-            aVal = a.startDate?.getTime() || 0;
-            bVal = b.startDate?.getTime() || 0;
-            break;
-          case 'endDate':
-            aVal = a.endDate?.getTime() || 0;
-            bVal = b.endDate?.getTime() || 0;
-            break;
-          case 'status':
-            aVal = a.status;
-            bVal = b.status;
-            break;
-          default:
-            return 0;
+        if (sortState.sortColumn === 'startDate') {
+          // 開始日専用のソートロジック
+          const aDate = a.startDate;
+          const bDate = b.startDate;
+          
+          // 両方とも未設定の場合
+          if (!aDate && !bDate) return 0;
+          
+          // 昇順の場合
+          if (sortState.sortDirection === 'asc') {
+            if (!aDate) return 1;  // aが未設定なら下に
+            if (!bDate) return -1; // bが未設定なら上に
+            return aDate.getTime() - bDate.getTime();
+          } else {
+            // 降順の場合
+            if (!aDate) return -1; // aが未設定なら上に
+            if (!bDate) return 1;  // bが未設定なら下に
+            return bDate.getTime() - aDate.getTime();
+          }
+        } else if (sortState.sortColumn === 'endDate') {
+          // 期限日専用のソートロジック
+          const aDate = a.endDate;
+          const bDate = b.endDate;
+          
+          // 両方とも未設定の場合
+          if (!aDate && !bDate) return 0;
+          
+          // 昇順の場合
+          if (sortState.sortDirection === 'asc') {
+            if (!aDate) return 1;  // aが未設定なら下に
+            if (!bDate) return -1; // bが未設定なら上に
+            return aDate.getTime() - bDate.getTime();
+          } else {
+            // 降順の場合
+            if (!aDate) return -1; // aが未設定なら上に
+            if (!bDate) return 1;  // bが未設定なら下に
+            return bDate.getTime() - aDate.getTime();
+          }
+        } else {
+          // その他のフィールドのソート
+          let aVal: any;
+          let bVal: any;
+          
+          switch (sortState.sortColumn) {
+            case 'projectKey':
+              aVal = a.projectKey;
+              bVal = b.projectKey;
+              break;
+            case 'name':
+              aVal = a.issueKey;
+              bVal = b.issueKey;
+              break;
+            case 'assignee':
+              aVal = a.assignee;
+              bVal = b.assignee;
+              break;
+            case 'status':
+              aVal = a.status;
+              bVal = b.status;
+              break;
+            default:
+              return 0;
+          }
+          
+          const result = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+          return sortState.sortDirection === 'asc' ? result : -result;
         }
-        
-        if (aVal < bVal) return sortState.sortDirection === 'asc' ? -1 : 1;
-        if (aVal > bVal) return sortState.sortDirection === 'asc' ? 1 : -1;
-        return 0;
-      });
-    } else {
-      sorted.sort((a, b) => {
-        if (!a.startDate && !b.startDate) return 0;
-        if (!a.startDate) return 1;
-        if (!b.startDate) return -1;
-        return a.startDate.getTime() - b.startDate.getTime();
       });
     }
 

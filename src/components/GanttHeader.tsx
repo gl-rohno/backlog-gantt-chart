@@ -8,7 +8,7 @@ interface GanttHeaderProps {
   chartWidth: number;
   days: Date[];
   sortColumn: SortColumn | null;
-  sortDirection: SortDirection;
+  sortDirection: SortDirection | null;
   onSort: (column: SortColumn) => void;
 }
 
@@ -29,13 +29,13 @@ export const GanttHeader: React.FC<GanttHeaderProps> = ({
   return (
     <div className="gantt-header" style={{ minWidth: `${chartWidth}px` }}>
       <div className="gantt-header-left">
-        <div className="header-cell sortable" onClick={() => onSort('project')}>
+        <div className="header-cell sortable" onClick={() => onSort('projectKey')}>
           <span>プロジェクト</span>
-          {renderSortIcon('project')}
+          {renderSortIcon('projectKey')}
         </div>
-        <div className="header-cell sortable" onClick={() => onSort('task')}>
+        <div className="header-cell sortable" onClick={() => onSort('name')}>
           <span>タスク名</span>
-          {renderSortIcon('task')}
+          {renderSortIcon('name')}
         </div>
         <div className="header-cell sortable" onClick={() => onSort('assignee')}>
           <span>担当者</span>

@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { GanttTask, BacklogStatus } from '../types/backlog';
 import { useGanttChart } from '../hooks/useGanttChart';
 import { TaskModal } from './TaskModal';
 import { GanttHeader } from './GanttHeader';
 import { TaskBar } from './TaskBar';
+import TaskActions from './TaskActions';
 import { formatDate, getStatusColor } from '../utils/ganttUtils';
+import { TIMING, MESSAGES, CSS_CLASSES } from '../constants/app';
 
 interface GanttChartProps {
   tasks: GanttTask[];
@@ -14,10 +16,13 @@ interface GanttChartProps {
   onTaskUpdate?: (taskId: string, updates: Partial<GanttTask>) => void;
   projectStatuses: Map<number, BacklogStatus[]>;
   resolutions: {id: number, name: string}[];
+  onSortedTasksChange?: (sortedTasks: GanttTask[]) => void;
 }
 
 
-const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedProjects, startDate, onTaskUpdate, projectStatuses, resolutions }) => {
+const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedProjects, startDate, onTaskUpdate, projectStatuses, resolutions, onSortedTasksChange }) => {
+  const [notification, setNotification] = useState<string | null>(null);
+  
   const {
     modal,
     editState,
@@ -51,12 +56,22 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
     projectStatuses
   });
 
+  const handleCopySuccess = useCallback((message: string) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), TIMING.NOTIFICATION_DISPLAY_DURATION);
+  }, []);
+
+  // ソート済みタスクを親コンポーネントに通知
+  useEffect(() => {
+    onSortedTasksChange?.(filteredTasks);
+  }, [filteredTasks, onSortedTasksChange]);
+
 
 
   if (filteredTasks.length === 0) {
     return (
       <div className="gantt-empty">
-        <p>表示するタスクがありません</p>
+        <p>{MESSAGES.NO_TASKS_TO_DISPLAY}</p>
       </div>
     );
   }
@@ -92,13 +107,14 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
               <div className="row-cell">
                 <span className="project-badge">{task.projectKey}</span>
               </div>
-              <div 
-                className="row-cell task-name" 
-                style={{ cursor: 'pointer' }}
-                onClick={(e) => handleRowClick(e, task)}
-              >
+              <div className="row-cell task-name">
                 <span className="issue-key">[{task.issueKey}]</span>
                 <span className="task-summary">{task.name}</span>
+                <TaskActions
+                  task={task}
+                  onCopySuccess={handleCopySuccess}
+                  onShowModal={handleRowClick}
+                />
               </div>
               <div className="row-cell">{task.assignee}</div>
               <div className="row-cell date-cell">{formatDate(task.startDate)}</div>
@@ -142,6 +158,12 @@ const GanttChart: React.FC<GanttChartProps> = ({ tasks, selectedUsers, selectedP
         onCancel={handleCancelEdit}
         onFormChange={(updates) => setEditState(prev => ({ ...prev, editForm: { ...prev.editForm, ...updates } }))}
       />
+      
+      {notification && (
+        <div className={CSS_CLASSES.COPY_NOTIFICATION}>
+          {notification}
+        </div>
+      )}
     </div>
   );
 };

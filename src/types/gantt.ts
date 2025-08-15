@@ -1,23 +1,56 @@
-export type SortColumn = 'project' | 'task' | 'assignee' | 'startDate' | 'endDate' | 'status';
-export type SortDirection = 'asc' | 'desc' | null;
+import { GanttTask } from './backlog';
+import { SortDirection, Position, DateRange } from './common';
 
-export interface ModalState {
-  show: boolean;
-  task: any | null;
-}
+// Re-export for convenience
+export type { SortDirection };
 
-export interface DragState {
-  isDragging: boolean;
-  dragStart: { x: number; y: number };
-  scrollStart: { x: number; y: number };
-}
+// ガントチャート固有のソートカラム
+export type SortColumn = 'projectKey' | 'name' | 'assignee' | 'startDate' | 'endDate' | 'status';
 
-export interface EditState {
-  editMode: boolean;
-  editForm: Record<string, any>;
-}
-
+// ガントチャート固有のソート状態
 export interface SortState {
   sortColumn: SortColumn | null;
-  sortDirection: SortDirection;
+  sortDirection: SortDirection | null;
+}
+
+// モーダル状態
+export interface ModalState {
+  show: boolean;
+  task: GanttTask | null;
+}
+
+// ドラッグ状態
+export interface DragState {
+  isDragging: boolean;
+  dragStart: Position;
+  scrollStart: Position;
+}
+
+// 編集状態
+export interface EditState {
+  editMode: boolean;
+  editForm: Partial<GanttTask>;
+}
+
+// ガントチャートの表示設定
+export interface GanttDisplayOptions {
+  showWeekends: boolean;
+  showHolidays: boolean;
+  timeScale: 'day' | 'week' | 'month';
+  showProgress: boolean;
+}
+
+// タスクバーのスタイル情報
+export interface TaskBarStyle {
+  left: string;
+  width: string;
+  backgroundColor: string;
+  display?: string;
+}
+
+// ガントチャートの設定
+export interface GanttConfig {
+  dateRange: DateRange;
+  displayOptions: GanttDisplayOptions;
+  columnWidths: Record<string, number>;
 }

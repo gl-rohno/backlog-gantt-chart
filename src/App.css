@@ -40,7 +40,7 @@ body {
 
 .header-left {
   display: flex;
-  align-items: center;
+  gap: 0.5rem;
 }
 
 .header-title {
@@ -91,6 +91,26 @@ body {
 .header-btn.active:hover {
   background: #2c5aa0;
   border-color: #2c5aa0;
+}
+
+.bulk-copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bulk-copy-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+}
+
+.bulk-copy-btn.disabled:hover {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #94a3b8;
 }
 
 
@@ -694,6 +714,94 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 100%;
+}
+
+/* Task Actions */
+.task-name {
+  position: relative;
+}
+
+.task-actions {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.task-name:hover .task-actions {
+  opacity: 1;
+}
+
+/* Action Buttons */
+.copy-button,
+.modal-button {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 4px;
+  cursor: pointer;
+  color: #718096;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.copy-button:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+  color: #4a5568;
+}
+
+.modal-button {
+  border-color: #bee3f8;
+  color: #3182ce;
+}
+
+.modal-button:hover {
+  background: #ebf8ff;
+  border-color: #90cdf4;
+  color: #2c5aa0;
+}
+
+.copy-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #48bb78;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: slideInRight 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 .project-badge {
