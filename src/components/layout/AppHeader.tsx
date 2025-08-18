@@ -1,28 +1,22 @@
 import React from 'react';
 import { Calendar, Settings, RefreshCw, Filter, ChevronLeft } from 'lucide-react';
-import BulkCopyButton from '../BulkCopyButton';
-import { GanttTask } from '../../types/backlog';
 
 interface AppHeaderProps {
   showSettings: boolean;
   showFilters: boolean;
   loading: boolean;
-  getFilteredTasks: () => GanttTask[];
   onToggleFilters: () => void;
   onToggleSettings: () => void;
   onRefresh: () => void;
-  onBulkCopySuccess: (message: string) => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
   showSettings,
   showFilters,
   loading,
-  getFilteredTasks,
   onToggleFilters,
   onToggleSettings,
   onRefresh,
-  onBulkCopySuccess,
 }) => {
   return (
     <header className="app-header">
@@ -35,20 +29,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       <div className="header-bottom">
         <div className="header-left">
           {!showSettings && (
-            <>
-              <button 
-                className={`header-btn ${showFilters ? 'active' : ''}`}
-                onClick={onToggleFilters}
-                title={showFilters ? 'フィルタを閉じる' : 'フィルタを開く'}
-              >
-                {showFilters ? <ChevronLeft size={18} /> : <Filter size={18} />}
-                <span>フィルタ</span>
-              </button>
-              <BulkCopyButton
-                tasks={getFilteredTasks()}
-                onCopySuccess={onBulkCopySuccess}
-              />
-            </>
+            <button 
+              className={`header-btn ${showFilters ? 'active' : ''}`}
+              onClick={onToggleFilters}
+              title={showFilters ? 'フィルタを閉じる' : 'フィルタを開く'}
+            >
+              {showFilters ? <ChevronLeft size={18} /> : <Filter size={18} />}
+              <span>フィルタ</span>
+            </button>
           )}
         </div>
         <div className="header-right">

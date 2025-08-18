@@ -6,6 +6,7 @@ import { TaskModal } from './TaskModal';
 import { GanttHeader } from './GanttHeader';
 import { TaskBar } from './TaskBar';
 import TaskActions from './TaskActions';
+import BulkCopyButton from './BulkCopyButton';
 import { formatDate, getStatusColor, isTaskOverdue } from '../utils/ganttUtils';
 import { TIMING, MESSAGES, CSS_CLASSES } from '../constants/app';
 
@@ -16,6 +17,7 @@ interface GanttChartProps {
   startDate: Date;
   spaceId: string;
   onTaskUpdate?: (taskId: string, updates: Partial<GanttTask>) => void;
+  onBulkCopySuccess?: (message: string) => void;
   projectStatuses: Map<number, BacklogStatus[]>;
   resolutions: {id: number, name: string}[];
 }
@@ -25,7 +27,7 @@ export interface GanttChartRef {
 }
 
 
-const GanttChart = React.memo(forwardRef<GanttChartRef, GanttChartProps>(({ tasks, selectedUsers, selectedProjects, startDate, spaceId, onTaskUpdate, projectStatuses, resolutions }, ref) => {
+const GanttChart = React.memo(forwardRef<GanttChartRef, GanttChartProps>(({ tasks, selectedUsers, selectedProjects, startDate, spaceId, onTaskUpdate, onBulkCopySuccess, projectStatuses, resolutions }, ref) => {
   // パフォーマンス監視は必要な時のみ有効化
   // useRenderTime('GanttChart', { enabled: false, threshold: 200 });
   
@@ -91,15 +93,15 @@ const GanttChart = React.memo(forwardRef<GanttChartRef, GanttChartProps>(({ task
     setShowActionsForTask(prev => prev === taskId ? null : taskId);
   }, []);
 
-  // 外部から filteredTasks を取得できるようにする
-  useImperativeHandle(ref, () => ({
-    getFilteredTasks: () => filteredTasks
-  }), [filteredTasks]);
-
   // 表示されるタスクのみをメモ化
   const visibleTasks = useMemo(() => {
     return filteredTasks.slice(0, 100); // 初期表示は100件まで
   }, [filteredTasks]);
+
+  // 外部から visibleTasks を取得できるようにする（画面表示しているタスクのみ）
+  useImperativeHandle(ref, () => ({
+    getFilteredTasks: () => visibleTasks
+  }), [visibleTasks]);
 
 
 
@@ -122,6 +124,18 @@ const GanttChart = React.memo(forwardRef<GanttChartRef, GanttChartProps>(({ task
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseLeave}
     >
+      <div className="gantt-toolbar-container">
+        <div className="gantt-toolbar">
+          <div className="gantt-toolbar-content">
+            <span className="task-count">{visibleTasks.length}件のタスク</span>
+            <BulkCopyButton
+              tasks={visibleTasks}
+              onCopySuccess={onBulkCopySuccess}
+              className="toolbar-bulk-copy"
+            />
+          </div>
+        </div>
+      </div>
       <GanttHeader
         chartWidth={chartWidth}
         days={days}

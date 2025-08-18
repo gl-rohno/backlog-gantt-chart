@@ -40,6 +40,7 @@ function App() {
     handleBulkCopySuccess,
   } = useApp();
 
+
   return (
     <ErrorBoundary>
       <div className="app">
@@ -47,11 +48,9 @@ function App() {
         showSettings={showSettings}
         showFilters={showFilters}
         loading={loading}
-        getFilteredTasks={() => ganttChartRef.current?.getFilteredTasks() || []}
         onToggleFilters={() => setShowFilters(!showFilters)}
         onToggleSettings={() => setShowSettings(true)}
         onRefresh={handleRefresh}
-        onBulkCopySuccess={handleBulkCopySuccess}
       />
 
       <main className="app-main">
@@ -94,6 +93,7 @@ function App() {
                     startDate={new Date(startDate)}
                     spaceId={apiConfig.spaceId}
                     onTaskUpdate={handleTaskUpdate}
+                    onBulkCopySuccess={handleBulkCopySuccess}
                     projectStatuses={projectStatuses}
                     resolutions={resolutions}
                   />

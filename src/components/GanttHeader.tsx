@@ -102,6 +102,7 @@ export const GanttHeader: React.FC<GanttHeaderProps> = ({
     </div>
   );
 
+
   return (
     <div className="gantt-header" style={{ minWidth: `${chartWidth}px` }}>
       <div className="gantt-header-left">
