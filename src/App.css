@@ -719,6 +719,43 @@ body {
   color: #2d3748;
 }
 
+.timeline-cell-today {
+  background-color: #ebf8ff;
+  border-left: 2px solid #3182ce;
+}
+
+.timeline-cell-today .timeline-date {
+  color: #2b6cb0;
+  font-weight: 700;
+}
+
+.timeline-cell-today .timeline-month {
+  color: #3182ce;
+}
+
+.gantt-day-column {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gantt-day-today {
+  background-color: rgba(59, 130, 246, 0.05);
+  border-left: 2px solid #3182ce;
+}
+
+.gantt-timeline-row {
+  position: relative;
+}
+
+.gantt-bar {
+  position: relative;
+  z-index: 2;
+}
+
 .gantt-body {
   flex: 1;
   width: 100%;

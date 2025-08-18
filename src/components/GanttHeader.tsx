@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { format } from 'date-fns';
+import { format, isToday } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { SortColumn, SortDirection } from '../types/gantt';
@@ -115,16 +115,19 @@ export const GanttHeader: React.FC<GanttHeaderProps> = ({
       </div>
       <div className="gantt-header-right">
         <div className="gantt-timeline">
-          {days.map((day, index) => (
-            <div key={index} className="timeline-cell">
-              <div className="timeline-date">
-                {format(day, 'd', { locale: ja })}
+          {days.map((day, index) => {
+            const isCurrentDay = isToday(day);
+            return (
+              <div key={index} className={`timeline-cell ${isCurrentDay ? 'timeline-cell-today' : ''}`}>
+                <div className="timeline-date">
+                  {format(day, 'd', { locale: ja })}
+                </div>
+                <div className="timeline-month">
+                  {format(day, 'MMM', { locale: ja })}
+                </div>
               </div>
-              <div className="timeline-month">
-                {format(day, 'MMM', { locale: ja })}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

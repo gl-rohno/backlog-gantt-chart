@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react';
+import { isToday } from 'date-fns';
 import { GanttTask, BacklogStatus } from '../types/backlog';
 import { useGanttChart } from '../hooks/useGanttChart';
 import { useThrottle } from '../hooks/usePerformance';
@@ -185,6 +186,17 @@ const GanttChart = React.memo(forwardRef<GanttChartRef, GanttChartProps>(({ task
             </div>
             <div className="gantt-row-right">
               <div className="gantt-timeline-row">
+                {/* 本日の縦線背景 */}
+                {days.map((day, dayIndex) => {
+                  const isTodayColumn = isToday(day);
+                  return (
+                    <div 
+                      key={dayIndex} 
+                      className={`gantt-day-column ${isTodayColumn ? 'gantt-day-today' : ''}`}
+                      style={{ left: `${dayIndex * 40}px` }}
+                    />
+                  );
+                })}
                 <TaskBar
                   task={task}
                   days={days}
