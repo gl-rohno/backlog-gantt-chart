@@ -1350,7 +1350,21 @@ body {
     gap: 1rem;
   }
   
+  .header-btn {
+    justify-content: center;
+    min-width: 2.5rem;
+  }
+  
   .header-btn span {
+    display: none;
+  }
+  
+  .bulk-copy-btn {
+    justify-content: center;
+    min-width: 2.5rem;
+  }
+  
+  .bulk-copy-btn span {
     display: none;
   }
   
@@ -1501,9 +1515,20 @@ body {
   .header-btn {
     padding: 0.5rem;
     font-size: 0.875rem;
+    justify-content: center;
+    min-width: 2.5rem;
   }
   
   .header-btn span {
+    display: none;
+  }
+  
+  .bulk-copy-btn {
+    justify-content: center;
+    min-width: 2.5rem;
+  }
+  
+  .bulk-copy-btn span {
     display: none;
   }
   
