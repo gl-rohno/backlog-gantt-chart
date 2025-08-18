@@ -24,6 +24,7 @@ export const TaskDateField: React.FC<TaskDateFieldProps> = ({
         const dateValue = e.target.value;
         onChange(dateValue ? new Date(dateValue) : null);
       }}
+      className="modal-input"
     />
   );
 };

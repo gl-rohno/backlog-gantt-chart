@@ -23,6 +23,7 @@ export const TaskSelectField: React.FC<TaskSelectFieldProps> = ({
     <select 
       value={value || ''} 
       onChange={(e) => onChange(e.target.value)}
+      className="modal-select"
     >
       <option value="">{placeholder}</option>
       {options.map(option => (

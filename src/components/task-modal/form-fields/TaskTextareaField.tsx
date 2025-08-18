@@ -25,6 +25,7 @@ export const TaskTextareaField: React.FC<TaskTextareaFieldProps> = ({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
+      className="modal-textarea"
     />
   );
 };
