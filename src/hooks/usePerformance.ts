@@ -8,7 +8,7 @@ export const useDebounce = <T extends (...args: any[]) => any>(
   callback: T,
   delay: number
 ): T => {
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<number>();
 
   return useCallback(
     ((...args: Parameters<T>) => {
@@ -153,7 +153,7 @@ export const useRenderTime = (componentName: string, options?: {
     logLevel = 'warn' 
   } = options || {};
 
-  if (process.env.NODE_ENV === 'development' && enabled) {
+  if (import.meta.env.DEV && enabled) {
     if (!renderStartRef.current) {
       renderStartRef.current = performance.now();
     }

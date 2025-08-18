@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { GanttTask, BacklogStatus } from '../types/backlog';
 import { useGanttChart } from '../hooks/useGanttChart';
-import { useRenderTime, useThrottle } from '../hooks/usePerformance';
+import { useThrottle } from '../hooks/usePerformance';
 import { TaskModal } from './TaskModal';
 import { GanttHeader } from './GanttHeader';
 import { TaskBar } from './TaskBar';

@@ -4,7 +4,7 @@
 
 // 環境変数やlocalStorageから設定を読み取り
 const getDevConfig = () => {
-  if (process.env.NODE_ENV !== 'development') {
+  if (!import.meta.env.DEV) {
     return {
       enablePerformanceLogging: false,
       enableDetailedLogging: false,
@@ -25,7 +25,7 @@ const getDevConfig = () => {
 export const DEV_CONFIG = getDevConfig();
 
 // 開発者向けのヘルパー関数をwindowオブジェクトに追加
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.DEV) {
   (window as any).devConfig = {
     enablePerformanceLogging: (enabled: boolean) => {
       localStorage.setItem('dev.enablePerformanceLogging', enabled.toString());

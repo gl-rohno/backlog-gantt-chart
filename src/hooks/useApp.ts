@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { BacklogApiService } from '../services/backlogApi';
 import { GanttTask, BacklogApiConfig, BacklogStatus, BacklogUser } from '../types/backlog';
 import { filterCompletedTasks } from '../utils/ganttUtils';

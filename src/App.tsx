@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import GanttChart, { GanttChartRef } from './components/GanttChart';
 import FilterPanel from './components/FilterPanel';
 import { AppHeader } from './components/layout/AppHeader';
